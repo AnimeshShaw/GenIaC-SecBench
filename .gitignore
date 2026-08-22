@@ -1,0 +1,27 @@
+﻿# Environments
+.env
+venv/
+env/
+__pycache__/
+*.pyc
+*.ps1
+
+# The entire data directory is hosted on Hugging Face!
+# We ignore the contents but keep the folder structure.
+data/*
+!data/.keep
+
+# Security Scanners Binaries / Executables
+tools/kics/
+tools/trivy/
+tools/*.exe
+tools/*.tar.gz
+tools/*.zip
+
+# IDEs
+.vscode/
+.idea/
+
+# Checkpoint / Scratch
+scratch/
+*.b64
