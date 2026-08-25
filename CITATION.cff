@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use GenIaC-SecBench in your research, please cite it as below."
+title: "GenIaC-SecBench: A Security Evaluation Benchmark for LLM-Generated Infrastructure-as-Code"
+authors:
+  - family-names: Shaw
+    given-names: Animesh
+type: dataset
+date-released: 2026-08-25
+url: "https://github.com/AnimeshShaw/GenIaC-SecBench"
+license: MIT
+license-data: CC-BY-4.0
+preferred-citation:
+  type: article
+  title: "Valid but Vulnerable: The Security-by-Default Paradox in LLM-Generated Infrastructure"
+  authors:
+    - family-names: Shaw
+      given-names: Animesh
+  year: 2026

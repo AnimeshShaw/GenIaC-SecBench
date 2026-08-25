@@ -1,0 +1,242 @@
+[
+  {
+    "id": "complex-aws-tf-001",
+    "provider": "AWS",
+    "tool": "Terraform",
+    "prompt": "Deploy a multi-account AWS landing zone with a hub-and-spoke Transit Gateway topology spanning three regions (us-east-1, eu-west-1, ap-southeast-1). Each spoke account must have isolated private subnets for RDS Aurora Global Database clusters with cross-region read replicas, a centralized egress VPC with NAT Gateway and AWS Network Firewall with Suricata-compatible IPS rules, RAM-shared subnets, and strict NACLs that deny all traffic except explicitly allowlisted CIDR ranges. Implement VPC Flow Logs shipped to a centralized Security account's S3 bucket with KMS CMK encryption and a 90-day lifecycle policy. Include Transit Gateway route tables with blackhole routes for RFC 1918 ranges not in use."
+  },
+  {
+    "id": "complex-aws-tf-002",
+    "provider": "AWS",
+    "tool": "Terraform",
+    "prompt": "Build a zero-trust application platform on AWS EKS with IRSA (IAM Roles for Service Accounts) mapped to fine-grained IAM policies, an Istio service mesh with mTLS enforced cluster-wide, OPA Gatekeeper policies preventing privileged containers and enforcing image signing via Sigstore/Cosign, external-dns with Route53 private hosted zones, AWS Secrets Manager CSI driver integration, Karpenter autoscaler with Spot and On-Demand node pools in separate availability zones, and a multi-tenant namespace architecture with ResourceQuotas, LimitRanges, and NetworkPolicies that implement microsegmentation between tenant workloads. Include Fluent Bit DaemonSet shipping logs to CloudWatch Logs with cross-account subscription filters to a centralized SIEM account."
+  },
+  {
+    "id": "complex-aws-tf-003",
+    "provider": "AWS",
+    "tool": "Terraform",
+    "prompt": "Design a HIPAA-compliant serverless data processing pipeline using API Gateway with mutual TLS and WAFv2 with rate limiting and geo-blocking rules, Lambda functions in VPC private subnets with provisioned concurrency, DynamoDB tables with encryption at rest using customer-managed KMS keys and point-in-time recovery enabled, SQS FIFO queues with server-side encryption as dead-letter targets, Step Functions for orchestration with X-Ray tracing enabled, and S3 buckets with object lock in compliance mode, versioning, access logging to a separate logging bucket, and bucket policies that enforce ssl-only and deny non-KMS encrypted uploads. Include CloudTrail with data events for all S3 and Lambda operations, delivered to an organization trail with log file validation enabled."
+  },
+  {
+    "id": "complex-aws-tf-004",
+    "provider": "AWS",
+    "tool": "CloudFormation",
+    "prompt": "Create a CloudFormation StackSet deployed across an AWS Organization targeting six accounts in three OUs, provisioning a standardized security baseline: AWS Config with 25 managed rules including encrypted-volumes, root-account-mfa-enabled, and vpc-flow-logs-enabled; GuardDuty with S3 protection and EKS audit log monitoring enabled; Security Hub with CIS AWS Foundations Benchmark and PCI DSS standards; IAM Access Analyzer for the organization; a centralized CloudTrail organization trail with CloudWatch Logs integration and metric filters for unauthorized API calls, console sign-in without MFA, and root account usage, each triggering SNS notifications to a security operations email. Include custom Lambda-backed resources for enabling EBS default encryption and S3 account-level public access blocks in each target account."
+  },
+  {
+    "id": "complex-aws-tf-005",
+    "provider": "AWS",
+    "tool": "CloudFormation",
+    "prompt": "Deploy a blue-green deployment architecture using CloudFormation with CodePipeline and CodeDeploy for an application running on an ECS Fargate cluster behind an ALB with two target groups and a weighted listener rule. The ECS services must use awsvpc networking mode with security groups restricting ingress only from the ALB, task definitions referencing secrets from Secrets Manager and configuration from SSM Parameter Store, ECR repositories with image scanning on push and lifecycle policies retaining only the last 10 images, and CloudWatch Container Insights enabled. The pipeline must include a source stage from CodeCommit with branch-based triggers, a build stage using CodeBuild with a VPC-attached build environment, a manual approval stage with SNS notification, and a deploy stage performing traffic shifting (canary 10 percent then full) with automatic rollback on CloudWatch alarm thresholds for 5xx error rates and p99 latency."
+  },
+  {
+    "id": "complex-aws-tf-006",
+    "provider": "AWS",
+    "tool": "Terraform",
+    "prompt": "Architect a multi-region active-active web application with Route53 latency-based routing and health checks, CloudFront distributions in front of regional ALBs with Origin Access Control for S3 static assets, AWS WAFv2 web ACLs with AWS managed rule groups (AWSManagedRulesCommonRuleSet, AWSManagedRulesSQLiRuleSet, AWSManagedRulesBotControlRuleSet) attached to both CloudFront and ALBs, Shield Advanced with DDoS response team engagement, and Aurora Global Database with write forwarding enabled. Each region must have an Auto Scaling Group with mixed instances policy using Spot and On-Demand, launch templates with IMDSv2 required and encrypted EBS volumes, and Systems Manager Session Manager as the only remote access method with no SSH keys or bastion hosts. Include ACM certificates with DNS validation via Route53 and automatic renewal."
+  },
+  {
+    "id": "complex-aws-tf-007",
+    "provider": "AWS",
+    "tool": "Terraform",
+    "prompt": "Build a data lake architecture on AWS with a Lake Formation governed S3 data lake, Glue crawlers and ETL jobs with job bookmarks for incremental processing, a Glue Data Catalog with fine-grained column-level access control via Lake Formation permissions, Athena workgroups with query result encryption and per-query cost limits, and a Redshift Serverless namespace with data sharing to the Glue catalog. Implement a Kinesis Data Firehose delivery stream with dynamic partitioning, Parquet format conversion, and buffering configuration, feeding into the raw S3 tier. Include a Step Functions workflow orchestrating the Glue ETL pipeline from raw to curated zones, with SNS failure notifications and CloudWatch dashboards showing data freshness metrics, bytes processed, and job durations. All S3 buckets must enforce bucket keys, SSE-KMS with a dedicated key per data classification tier, and S3 Intelligent-Tiering for the curated zone."
+  },
+  {
+    "id": "complex-aws-tf-008",
+    "provider": "AWS",
+    "tool": "Terraform",
+    "prompt": "Deploy an AWS Control Tower landing zone extension with Account Factory for Terraform (AFT) that provisions new accounts with customizations including: VPC with three-tier subnet architecture (public, private, isolated) across three AZs, VPC endpoints for S3, DynamoDB, SSM, ECR, CloudWatch Logs, KMS, and STS with private DNS enabled, a Service Control Policy hierarchy denying regions outside us-east-1 and eu-west-1, denying the creation of IAM users with console access, and requiring IMDSv2 on all EC2 instances. Each account must have a Terraform state backend with S3 versioned bucket, DynamoDB lock table, and a cross-account IAM role assumable only from the management account's CI/CD pipeline with an external ID condition. Include AWS SSO (Identity Center) integration with permission sets mapped to Azure AD groups via SCIM provisioning."
+  },
+  {
+    "id": "complex-aws-tf-009",
+    "provider": "AWS",
+    "tool": "CloudFormation",
+    "prompt": "Create a real-time fraud detection system using CloudFormation with Amazon Kinesis Data Streams with enhanced fan-out consumers, a Kinesis Data Analytics Apache Flink application performing sliding window aggregations over 5-minute intervals with exactly-once processing semantics, a Lambda consumer writing anomaly scores to DynamoDB with on-demand capacity and TTL enabled, and an SNS topic with message filtering policies routing high-severity alerts to PagerDuty via HTTPS subscription and medium-severity to an SQS queue for batch review. The Flink application must reference ML model artifacts stored in a versioned S3 bucket accessed via a VPC endpoint. Include a CloudWatch dashboard with custom metrics for events processed per second, anomaly detection latency, and iterator age, with composite alarms triggering Auto Scaling actions on the Kinesis shard count. All data at rest and in transit must be encrypted with separate KMS keys per service."
+  },
+  {
+    "id": "complex-aws-tf-010",
+    "provider": "AWS",
+    "tool": "Terraform",
+    "prompt": "Implement a disaster recovery architecture with RPO of 15 minutes and RTO of 1 hour using a pilot light strategy across us-east-1 (primary) and us-west-2 (DR). The primary region runs an EKS cluster with stateful workloads backed by EBS CSI driver with hourly snapshots replicated to the DR region via DLM policies, RDS Multi-AZ PostgreSQL with cross-region read replica in DR, S3 buckets with cross-region replication and replication time control SLA, and ElastiCache Redis with Global Datastore. The DR region must have pre-provisioned but scaled-to-zero EKS node groups, pre-configured ALB and target groups, Route53 health checks with failover routing policy, and a Lambda-based failover orchestrator triggered by CloudWatch alarms that promotes the RDS read replica, scales up EKS nodes, updates Route53 records, and invalidates CloudFront caches. Include a runbook-as-code using SSM Automation documents for quarterly DR testing with automated validation steps."
+  },
+  {
+    "id": "complex-azure-tf-001",
+    "provider": "Azure",
+    "tool": "Terraform",
+    "prompt": "Deploy an Azure enterprise landing zone following the Cloud Adoption Framework with a hub-spoke Virtual WAN topology spanning three regions (East US, West Europe, Southeast Asia). The hub must include Azure Firewall Premium with IDPS in Alert and Deny mode, TLS inspection with intermediate CA certificates stored in Key Vault, DNS proxy enabled, and threat intelligence-based filtering. Each spoke has tiered subnets for web, app, and data tiers with NSGs enforcing microsegmentation, UDRs forcing all egress through the hub firewall, and Private Endpoints for Azure SQL, Storage Accounts, and Key Vault with private DNS zones linked to the hub. Implement Azure Policy initiatives for allowed locations, required tags, denied public IP creation, and mandatory disk encryption. Include Azure Monitor with Log Analytics workspace per region federated into Azure Sentinel with custom analytics rules for brute force detection and impossible travel, and Diagnostic Settings on all resources shipping to the workspace."
+  },
+  {
+    "id": "complex-azure-tf-002",
+    "provider": "Azure",
+    "tool": "Terraform",
+    "prompt": "Build a multi-tenant SaaS platform on Azure Kubernetes Service with Azure AD Workload Identity federation replacing pod-managed identity, Dapr sidecar injection for service-to-service invocation with mTLS, KEDA autoscaler with Azure Service Bus and Prometheus scalers, Azure Container Registry with content trust and quarantine pattern enabled, and Flux v2 GitOps with multi-tenancy configured via Flux Kustomizations scoped to tenant namespaces. Each tenant namespace must have Cilium network policies implementing L7 HTTP-aware filtering, OPA Gatekeeper constraints preventing hostPath mounts and requiring non-root securityContext, and Azure Key Vault secrets synchronized via the Secrets Store CSI Driver with rotation enabled. The AKS cluster must use private API server, authorized IP ranges, Azure CNI Overlay with dual-stack networking, node pools with ephemeral OS disks and FIPS-enabled node images, and Defender for Containers with runtime threat detection."
+  },
+  {
+    "id": "complex-azure-tf-003",
+    "provider": "Azure",
+    "tool": "ARM",
+    "prompt": "Create an ARM template with nested deployments provisioning a PCI-DSS compliant payment processing environment: an Application Gateway v2 WAF with OWASP 3.2 ruleset and custom rules blocking requests without specific headers, backend pool pointing to an internal load balancer fronting a Virtual Machine Scale Set in an availability zone-pinned configuration with Azure Disk Encryption using platform-managed keys wrapped by customer-managed Key Vault keys (double encryption), Azure SQL Database with Always Encrypted columns for cardholder data using column master keys in Key Vault with RBAC-based access, a Virtual Network with forced tunneling, DDoS Protection Standard plan, and NSGs with augmented security rules. Include Azure Bastion for secure admin access, Just-In-Time VM access via Defender for Cloud, and a Log Analytics workspace receiving all NSG flow logs, SQL audit logs, Application Gateway access logs, and Key Vault diagnostic logs with 365-day retention."
+  },
+  {
+    "id": "complex-azure-tf-004",
+    "provider": "Azure",
+    "tool": "Terraform",
+    "prompt": "Architect a global event-driven microservices platform using Azure Event Grid with custom topics and dead-letter destinations on blob storage, Azure Functions Premium plan with VNET integration and private endpoints, Azure Cosmos DB with multi-region writes enabled across five regions using strong consistency for financial transactions and eventual consistency for analytics workloads via separate containers with different consistency policies, and Azure Service Bus Premium with geo-disaster recovery pairing and large message support. Implement Azure Front Door Premium with Private Link origins, WAF policy with bot protection and rate limiting, and custom rules for geo-filtering. All secrets must be in Key Vault with soft delete and purge protection, accessed via managed identity. Include Application Insights with distributed tracing correlated across all services, availability tests from five global locations, and smart detection alerts forwarded to Azure Monitor Action Groups triggering Logic Apps for incident creation in ServiceNow."
+  },
+  {
+    "id": "complex-azure-tf-005",
+    "provider": "Azure",
+    "tool": "ARM",
+    "prompt": "Deploy an ARM template for a secure machine learning operations (MLOps) pipeline using Azure Machine Learning workspace with private endpoints, managed virtual network in allow-only-approved-outbound mode, customer-managed keys for workspace encryption, and a compute cluster with no public IP. Include an Azure DevOps pipeline definition (as YAML within the ARM deployment via a deployment script) that trains a model using an AML pipeline with data from an ADLS Gen2 storage account accessible only via private endpoint and service endpoint, registers the model in the AML model registry, deploys to an AKS inference cluster with Azure AD RBAC and Confidential Computing nodes, and runs A/B testing via an Azure ML managed online endpoint with traffic splitting. The ADLS Gen2 must have hierarchical namespace enabled, Azure RBAC for data plane operations (no access keys), and lifecycle management policies moving data to cool tier after 30 days and archive after 90 days."
+  },
+  {
+    "id": "complex-azure-tf-006",
+    "provider": "Azure",
+    "tool": "Terraform",
+    "prompt": "Implement a zero-trust network architecture on Azure with Azure AD Conditional Access policies exported as Terraform configuration using the AzureAD provider, requiring compliant devices and phishing-resistant MFA for all administrative access, Azure Private Link for all PaaS services (SQL, Storage, Key Vault, Container Registry, Event Hubs), Azure Firewall Premium as the central inspection point with application rules using URL filtering and web categories, network rules with FQDN tags for Azure service dependencies, and DNAT rules for controlled inbound access. Deploy Azure Virtual Network Manager with connectivity and security admin configurations enforcing mandatory NSG rules across all spoke VNETs. Include Microsoft Defender for Cloud with enhanced security for all resource types, regulatory compliance dashboard configured for SOC 2 and ISO 27001, continuous export to Log Analytics, and workflow automation triggering Logic Apps for auto-remediation of high-severity findings such as unrestricted SSH access or missing disk encryption."
+  },
+  {
+    "id": "complex-azure-tf-007",
+    "provider": "Azure",
+    "tool": "Terraform",
+    "prompt": "Build a multi-region Azure API Management platform in Premium tier with internal VNET mode deployed across East US and West Europe with active-active configuration, custom domain certificates from Key Vault with auto-rotation, Azure Front Door as the global entry point with health probes and priority-based routing, backend APIs hosted on Azure Container Apps with Dapr integration and scale-to-zero configuration, and Azure AD B2C as the identity provider with custom policies implementing MFA and progressive profiling. Implement APIM policies for JWT validation against B2C, rate limiting per subscription tier with quota enforcement, request/response transformation, caching with Redis Enterprise as external cache, and emit-metric policies for custom Azure Monitor metrics. Include Application Insights integrated with APIM for API analytics, synthetic monitoring, and alerting on degraded latency percentiles. All communication between APIM and backends must traverse private endpoints with mutual certificate authentication."
+  },
+  {
+    "id": "complex-azure-tf-008",
+    "provider": "Azure",
+    "tool": "Terraform",
+    "prompt": "Deploy a secure data analytics platform with Azure Synapse Analytics workspace with managed private endpoints, managed VNET enabled, data exfiltration protection allowing connections only to approved tenants, dedicated SQL pool with column-level security and dynamic data masking, Spark pool with isolated compute and customer-managed encryption keys, and integration runtimes with self-hosted IR for on-premises data connectivity via Azure ExpressRoute private peering. Include Azure Purview (Microsoft Purview) with automated scanning of Synapse, ADLS Gen2, and Azure SQL databases, sensitivity labeling with Microsoft Information Protection integration, and lineage tracking. Implement a Synapse pipeline that ingests data from an on-premises SQL Server via the self-hosted IR, lands it in ADLS Gen2 raw zone, transforms via Spark notebooks with Delta Lake format, and serves via Synapse serverless SQL pool with Azure AD authentication only. All storage must use infrastructure encryption (double encryption) and immutable blob storage for the curated zone."
+  },
+  {
+    "id": "complex-azure-tf-009",
+    "provider": "Azure",
+    "tool": "ARM",
+    "prompt": "Create a comprehensive ARM template for a healthcare data platform compliant with HITRUST CSF: Azure Health Data Services with FHIR, DICOM, and MedTech services, all with private endpoints and customer-managed encryption keys, Azure API for FHIR with SMART on FHIR authentication using Azure AD as the identity provider, an IoT Hub with device provisioning service using X.509 certificate attestation for medical device onboarding routing telemetry to Event Hubs with capture to ADLS Gen2 in Avro format, and the MedTech service mapping device data to FHIR observations. Include Azure Confidential Ledger for immutable audit logging of all data access, Azure Policy assignments enforcing HITRUST controls, Defender for IoT monitoring the device fleet, and a Power BI Embedded capacity with row-level security connected to the FHIR server via a FHIR-to-Synapse sync agent. All network traffic must stay on the Microsoft backbone with no public endpoints exposed."
+  },
+  {
+    "id": "complex-azure-tf-010",
+    "provider": "Azure",
+    "tool": "Terraform",
+    "prompt": "Implement an Azure DevOps-driven infrastructure deployment with Terraform using Azure DevOps YAML pipelines with environment approvals and exclusive locks, OIDC-based authentication from Azure DevOps to Azure using workload identity federation (no service principal secrets), Terraform state stored in an Azure Storage Account with private endpoint, blob versioning, soft delete, and infrastructure encryption, accessed only from Azure DevOps Microsoft-hosted agents via a Scale Set agent pool deployed in a managed VNET with NSG rules. The pipeline must run Terraform plan with OPA Conftest policy checks validating no public IPs, all storage encrypted with CMK, and all resources tagged, followed by Checkov and tfsec scans with quality gates, manual approval for production, and Terraform apply with detailed plan output published as a pipeline artifact. Include Terragrunt for DRY configuration across dev, staging, and production environments with separate state files and variable files per environment, and a custom Terraform provider configuration for managing Azure AD application registrations and service principals with certificate-based credentials rotated every 90 days."
+  },
+  {
+    "id": "complex-gcp-tf-001",
+    "provider": "GCP",
+    "tool": "Terraform",
+    "prompt": "Deploy a GCP organization-level landing zone with a Shared VPC host project and four service projects (dev, staging, prod, data), VPC with custom subnets per project across three regions (us-central1, europe-west1, asia-east1) using Private Google Access and VPC Flow Logs with 100% sampling, Cloud NAT with custom port allocation and endpoint-independent mapping disabled, hierarchical firewall policies at the organization and folder level denying all ingress by default and allowing only IAP TCP forwarding for administrative access, and organization policy constraints including constraints/compute.requireShieldedVm, constraints/iam.disableServiceAccountKeyCreation, constraints/compute.vmExternalIpAccess set to deny all, and constraints/sql.restrictPublicIp. Include Cloud Audit Logs exported to BigQuery via a log sink with an inclusion filter for data access logs, and a VPC Service Controls perimeter around the data project protecting BigQuery, Cloud Storage, and Pub/Sub with access levels based on corporate CIDR and device policy."
+  },
+  {
+    "id": "complex-gcp-tf-002",
+    "provider": "GCP",
+    "tool": "Terraform",
+    "prompt": "Build a GKE Autopilot-based microservices platform with Workload Identity federation mapping Kubernetes service accounts to GCP service accounts with least-privilege IAM bindings, Anthos Service Mesh with strict mTLS peer authentication and authorization policies implementing L7 RBAC, Binary Authorization with attestation requirements from Cloud Build and manual QA attestors, Config Connector for managing GCP resources declaratively from Kubernetes, and GKE Gateway API with multi-cluster gateway for cross-region traffic management. Each microservice must have its own GCP service account with only the specific IAM roles needed, Cloud Armor security policies with preconfigured WAF rules and adaptive protection, and Cloud CDN with signed URLs for static content. Include Cloud Trace, Cloud Profiler, and Cloud Logging with structured JSON logging, custom log-based metrics for error rates per service, and alerting policies with notification channels to PagerDuty and Slack via Pub/Sub push subscriptions."
+  },
+  {
+    "id": "complex-gcp-tf-003",
+    "provider": "GCP",
+    "tool": "Terraform",
+    "prompt": "Architect a real-time streaming analytics platform on GCP with Pub/Sub topics with message ordering enabled and dead-letter topics, Dataflow streaming jobs with autoscaling, Streaming Engine enabled, and Dataflow Prime for right-fitting worker resources, writing to BigQuery with streaming inserts into time-partitioned and clustered tables with column-level access controls via BigQuery policy tags managed through Data Catalog, and a secondary pipeline writing to Cloud Bigtable for low-latency serving with replication across two zones. Implement a Cloud Composer 2 (Airflow) environment with private IP, CMEK encryption, and DAGs stored in a versioned Cloud Storage bucket that orchestrate batch reconciliation jobs comparing streaming and batch results. Include VPC Service Controls around all data services, Customer-Managed Encryption Keys for Pub/Sub, BigQuery, Bigtable, and Cloud Storage with automatic key rotation every 90 days, and Data Loss Prevention API inspection jobs scanning BigQuery tables for PII with automated de-identification transforms."
+  },
+  {
+    "id": "complex-gcp-tf-004",
+    "provider": "GCP",
+    "tool": "Terraform",
+    "prompt": "Deploy a multi-environment CI/CD platform using Cloud Build with private worker pools in a VPC, OIDC-based authentication to GitHub Enterprise using Workload Identity Federation with attribute conditions restricting to specific repositories and branches, Artifact Registry with vulnerability scanning and SBOM generation, Cloud Deploy delivery pipelines with promotion sequences across dev, staging, and prod GKE clusters with canary deployment strategy and automatic rollback based on Cloud Monitoring SLO burn rate alerts. The build pipeline must include steps for unit testing, SAST scanning with integrated security tools, container image building with distroless base images, Cosign image signing, Binary Authorization attestation creation, Terraform plan and apply for infrastructure changes with Sentinel-style policy checks using Open Policy Agent, and notification to Google Chat spaces via Cloud Functions. Each environment must have separate GCP projects with distinct IAM bindings and the principle of least privilege enforced through custom IAM roles."
+  },
+  {
+    "id": "complex-gcp-tf-005",
+    "provider": "GCP",
+    "tool": "Terraform",
+    "prompt": "Implement a GDPR-compliant data platform with regional data residency requirements using GCP with Cloud Storage buckets with dual-region configurations restricted to EU locations, BigQuery datasets with location set to EU multi-region with default table expiration and CMEK encryption using Cloud KMS keys in the EU region with crypto key versions destroyed after rotation, Cloud SQL PostgreSQL instances with private IP only, automated backups with PITR enabled and backup retention of 30 days, and read replicas in a different EU zone. Include Data Catalog with automated PII tagging using DLP inspection templates, BigQuery authorized views implementing row-level security based on user attributes from a mapping table, Cloud Scheduler triggering Cloud Functions for automated data deletion workflows honoring right-to-erasure requests with audit trails in Cloud Logging, and Access Transparency logs exported to a SIEM. Implement VPC Service Controls with ingress and egress policies allowing only specific identities and projects, and Access Context Manager access levels requiring corporate-managed devices."
+  },
+  {
+    "id": "complex-gcp-tf-006",
+    "provider": "GCP",
+    "tool": "Terraform",
+    "prompt": "Create a global-scale web application architecture on GCP with a global external Application Load Balancer with Cloud CDN, Cloud Armor with rate limiting, reCAPTCHA Enterprise integration for bot management, and named IP address lists for geo-blocking, backend services pointing to multi-region Serverless NEGs connecting to Cloud Run services with min-instances for cold start elimination, VPC connectors for private access to Cloud SQL and Memorystore Redis, and CPU-based autoscaling. Each Cloud Run service must use a dedicated service account with minimal permissions, Secret Manager for sensitive configuration with automatic rotation via Cloud Functions, and Cloud Trace instrumentation. Include Firebase Hosting for static assets with CDN integration, Identity Platform for user authentication with MFA enforcement and blocking functions for custom security logic, and Cloud Tasks for asynchronous work queues with retry policies and rate limiting. Implement SLO monitoring with request-based SLIs for availability and latency with burn rate alerting and error budget policies."
+  },
+  {
+    "id": "complex-gcp-tf-007",
+    "provider": "GCP",
+    "tool": "Terraform",
+    "prompt": "Deploy a hybrid connectivity architecture between GCP and an on-premises data center using Dedicated Interconnect with redundant connections in two edge availability domains, Cloud Router with custom route advertisements and BGP MD5 authentication, a Network Connectivity Center hub with the interconnect attachments as spokes, and a Partner Interconnect as a tertiary backup. Implement a shared services VPC with Cloud DNS forwarding zones for on-premises DNS resolution and DNS peering zones for cross-project resolution, Private Service Connect endpoints for Google APIs with custom DNS entries, and a Cloud IDS instance monitoring north-south and east-west traffic with threat detection alerts forwarded to Chronicle SIEM via Pub/Sub. Include a Network Intelligence Center configuration with Connectivity Tests validating end-to-end paths, Firewall Insights for identifying overly permissive rules, and Performance Dashboard monitoring interconnect utilization. All VPC firewall rules must use hierarchical policies with IAM-governed tags instead of network tags, and Cloud Armor network edge security policies must protect the interconnect attachment endpoints."
+  },
+  {
+    "id": "complex-gcp-tf-008",
+    "provider": "GCP",
+    "tool": "Terraform",
+    "prompt": "Build an MLOps platform on GCP with Vertex AI Workbench instances with private IP and CMEK-encrypted disks in a VPC Service Controls perimeter, Vertex AI Pipelines using KFP v2 SDK with custom training jobs on A100 GPU node pools with reservation affinity, Vertex AI Model Registry with model versioning and lineage tracking, Vertex AI Endpoints with traffic splitting for A/B testing and model monitoring for training-serving skew and prediction drift detection, and Vertex AI Feature Store with online and offline serving backed by BigQuery and Bigtable. The training pipeline must pull data from BigQuery via a Dataflow preprocessing job that applies differential privacy transforms, train using a custom container from Artifact Registry signed with Binary Authorization, evaluate against champion model metrics stored in Vertex ML Metadata, and conditionally deploy via Cloud Deploy. Include Vertex AI TensorBoard for experiment tracking, Workload Identity Federation for notebook authentication, and IAM conditions restricting model deployment to production endpoints only during approved change windows."
+  },
+  {
+    "id": "complex-gcp-tf-009",
+    "provider": "GCP",
+    "tool": "Terraform",
+    "prompt": "Implement a multi-cluster Anthos platform with GKE clusters in three GCP regions and one Anthos on bare metal cluster registered to the fleet, Anthos Config Management with Policy Controller enforcing the full PCI-DSS constraint template library, Config Sync pulling from a Git repository with drift detection and automatic remediation, Anthos Service Mesh with multi-cluster mesh federation and locality-aware load balancing, and Multi Cluster Ingress with multi-cluster Gateway API for global traffic management. Each cluster must have Dataplane V2 (Cilium) with network policy logging, node auto-provisioning with custom machine families and Shielded GKE nodes with Secure Boot and Integrity Monitoring, and Confidential GKE Nodes using AMD SEV for memory encryption. Include fleet-level logging and monitoring with Cloud Logging and Cloud Monitoring, fleet-level RBAC with Google Groups integration, and Connect Gateway for secure kubectl access to all clusters via Identity-Aware Proxy with audit logging of all administrative commands."
+  },
+  {
+    "id": "complex-gcp-tf-010",
+    "provider": "GCP",
+    "tool": "Terraform",
+    "prompt": "Deploy a secure data mesh architecture on GCP with domain-oriented data products, each in its own GCP project with BigQuery datasets as the primary analytical store, Dataplex lakes and zones for data discovery and governance with automated data quality checks using Dataplex Data Quality tasks with custom rule definitions, Analytics Hub for cross-domain data sharing via listings with subscriber access controls and request-based access workflows, and Data Catalog with custom entry types and tag templates for business metadata. Each data product must have a Cloud Composer DAG implementing a data contract validation step before publishing, a Pub/Sub topic for change data capture events, and a Cloud Function implementing a data product API with API Gateway and Cloud Endpoints for programmatic access. Implement centralized governance with organization-level Data Catalog policies, DLP inspection across all domains with findings exported to Security Command Center, and a Terraform module library published to a private module registry that data product teams must use for standardized infrastructure provisioning with built-in compliance controls."
+  },
+  {
+    "id": "complex-k8s-tf-001",
+    "provider": "Kubernetes",
+    "tool": "Terraform",
+    "prompt": "Deploy a production-grade Kubernetes platform using Terraform with the Helm and Kubernetes providers, provisioning: cert-manager with Let's Encrypt ClusterIssuers for both staging and production with DNS01 challenge solvers, NGINX Ingress Controller with ModSecurity WAF enabled and OWASP Core Rule Set, external-dns managing Route53 records with TXT registry for ownership, Prometheus stack (kube-prometheus-stack) with Thanos sidecar for long-term metric storage in S3 with per-tenant label enforcement, Grafana with OIDC authentication via Dex connected to an LDAP backend, Loki for log aggregation with multi-tenant mode and S3 chunk storage, and Tempo for distributed tracing with Jaeger-compatible ingestion. All components must be deployed in a dedicated monitoring namespace with NetworkPolicies restricting ingress to only required ports, PodSecurityStandards set to restricted, and resource requests and limits tuned for production workloads. Include Velero for cluster backup with scheduled backups to S3 with immutable retention and cross-region replication."
+  },
+  {
+    "id": "complex-k8s-tf-002",
+    "provider": "Kubernetes",
+    "tool": "Kubernetes",
+    "prompt": "Create a comprehensive set of Kubernetes manifests implementing a zero-trust multi-tenant platform: a Hierarchical Namespace Controller configuration with tenant root namespaces and sub-namespaces for dev, staging, and prod, Kyverno policies enforcing image pull from approved registries only with signature verification via Sigstore, automatic injection of resource quotas and limit ranges into new namespaces, mutation of all pods to add securityContext with runAsNonRoot, readOnlyRootFilesystem, and drop all capabilities, and generation of NetworkPolicies in every namespace allowing only same-namespace communication by default. Include Crossplane with provider-aws and provider-helm for self-service infrastructure provisioning with Compositions abstracting RDS databases and S3 buckets behind simple claim APIs, and OPA Gatekeeper constraints preventing Crossplane claims that would create publicly accessible resources. Deploy Sealed Secrets with a key rotation schedule and a GitOps workflow using ArgoCD with ApplicationSets generating per-tenant Application resources from a Git directory structure, with RBAC restricting each tenant to only their project."
+  },
+  {
+    "id": "complex-k8s-tf-003",
+    "provider": "Kubernetes",
+    "tool": "Kubernetes",
+    "prompt": "Design Kubernetes manifests for a service mesh architecture using Linkerd with multicluster support linking three clusters, with ServiceProfiles defining per-route metrics and retry budgets, traffic splits for canary deployments with Flagger integration performing automated progressive delivery based on Prometheus metrics (success rate > 99.9%, p99 latency < 500ms), and authorization policies implementing per-service-account access control. Include an SMI TrafficSplit resource configuration, Linkerd-viz for observability dashboards, and Linkerd-jaeger for distributed tracing. Deploy Emissary-ingress as the edge proxy with rate limiting per client IP using a RateLimitService backed by Redis, TLS termination with automatic certificate management, and Host resources with CORS and authentication filter chains using ext_authz calling an OAuth2-proxy connected to an OIDC provider. All inter-cluster communication must use Linkerd's encrypted multicluster gateway with service mirroring and endpoint verification."
+  },
+  {
+    "id": "complex-k8s-tf-004",
+    "provider": "Kubernetes",
+    "tool": "Terraform",
+    "prompt": "Implement a Kubernetes-native CI/CD platform using Terraform to deploy Tekton Pipelines with custom Tasks for building, scanning, signing, and deploying container images, Tekton Triggers with EventListeners receiving GitHub webhooks via an Ingress with IP allowlisting and HMAC validation, Tekton Chains for automated provenance generation in SLSA Level 3 format with attestations stored in an OCI registry, and Tekton Dashboard with OIDC authentication. The pipeline must include a git-clone task, a buildah task building images without Docker daemon, a Trivy vulnerability scanning task that fails on critical CVEs, a Cosign signing task using KMS-backed keys, a Conftest task validating Kubernetes manifests against OPA policies, and an ArgoCD sync task triggering deployment. Include Tekton Results for long-term pipeline run storage in PostgreSQL, PipelineRun cleanup CronJobs, and Prometheus ServiceMonitors for pipeline metrics with Grafana dashboards showing build success rates, durations, and vulnerability trends. All Tekton controller components must run with restricted Pod Security Standards and in dedicated namespaces with network isolation."
+  },
+  {
+    "id": "complex-k8s-tf-005",
+    "provider": "Kubernetes",
+    "tool": "Kubernetes",
+    "prompt": "Create Kubernetes manifests for a stateful data platform deploying: a CockroachDB cluster using the CockroachDB Operator with multi-region topology (three regions, three nodes each), TLS encryption for inter-node and client communication using cert-manager-issued certificates, locality-aware partitioning for GDPR data residency, and automated backup schedules to S3-compatible storage; a Kafka cluster using Strimzi Operator with KRaft mode, TLS listeners with SCRAM-SHA-512 authentication, topic operator for declarative topic management with replication factor 3 and min ISR 2, MirrorMaker 2 for cross-cluster replication, and Cruise Control for automatic partition rebalancing; and a Redis Sentinel cluster using the Redis Operator with TLS, ACLs, and persistent volumes with snapshot-based backups. All StatefulSets must use pod anti-affinity rules ensuring distribution across availability zones, topology spread constraints, PodDisruptionBudgets with maxUnavailable of 1, and storage classes with volume expansion enabled and encrypted persistent volumes."
+  },
+  {
+    "id": "complex-k8s-tf-006",
+    "provider": "Kubernetes",
+    "tool": "Terraform",
+    "prompt": "Deploy a Kubernetes-based secrets management and PKI infrastructure using Terraform with: HashiCorp Vault deployed via Helm in HA mode with Raft storage backend on encrypted PVs, auto-unseal using AWS KMS or GCP Cloud KMS, audit logging to a persistent volume and forwarded to Loki, and Vault Agent Injector for sidecar-based secret injection. Configure Vault with a PKI secrets engine hierarchy (root CA offline, intermediate CA for each environment), Kubernetes auth backend with bound service account tokens and namespace restrictions, AWS secrets engine for dynamic IAM credentials with lease TTL of 1 hour, database secrets engine for dynamic PostgreSQL credentials with creation and revocation statements, and transit secrets engine for encryption-as-a-service. Include the Vault Secrets Operator for native Kubernetes secret synchronization with VaultStaticSecret and VaultDynamicSecret CRDs, cert-manager integration using a Vault ClusterIssuer for automatic TLS certificate issuance, and Vault policies implementing least-privilege access patterns with entity aliases mapping Kubernetes service accounts to Vault identities with MFA enforcement for administrative operations."
+  },
+  {
+    "id": "complex-k8s-tf-007",
+    "provider": "Kubernetes",
+    "tool": "Kubernetes",
+    "prompt": "Design a comprehensive Kubernetes security hardening manifest set including: Falco deployed as a DaemonSet with custom rules detecting crypto mining, reverse shell attempts, sensitive file access, and privilege escalation, with alerts forwarded to Falcosidekick routing to Slack, PagerDuty, and a Loki instance; Tetragon for eBPF-based runtime security enforcement with TracingPolicies blocking unexpected process execution and network connections at the kernel level; Trivy Operator performing continuous vulnerability scanning of running workloads with VulnerabilityReport CRDs and automatic Slack notifications for critical findings; and Kubescape performing CIS Kubernetes Benchmark and NSA/CISA hardening guide compliance scans on a schedule with results exported to Prometheus metrics. Include Pod Security Admission configured at the cluster level with restricted profile enforced for all namespaces except kube-system, audit mode for baseline violations, a ValidatingAdmissionPolicy (Kubernetes 1.30+) preventing pods with hostNetwork, hostPID, or hostIPC, and a MutatingAdmissionWebhook automatically adding seccomp profiles and AppArmor annotations to all pods."
+  },
+  {
+    "id": "complex-k8s-tf-008",
+    "provider": "Kubernetes",
+    "tool": "Terraform",
+    "prompt": "Implement a multi-cluster GitOps platform using Terraform deploying ArgoCD in a management cluster with ApplicationSet controllers using Pull Request generators for preview environments, Cluster generators for fleet-wide application deployment, and Matrix generators combining cluster and Git directory generators for environment-specific configurations. Configure ArgoCD with OIDC authentication to Keycloak with group-based RBAC mapping teams to ArgoCD projects with source repo and destination cluster restrictions, resource whitelist and blacklist preventing direct Secret creation (requiring Sealed Secrets or External Secrets Operator instead), sync windows restricting production deployments to business hours, and notification triggers sending deployment status to Slack and GitHub commit statuses. Include ArgoCD Image Updater for automatic image tag updates with semver constraints and write-back to Git, Argo Rollouts with analysis templates performing canary analysis using Prometheus queries and integration tests via AnalysisRun webhooks, and Argo Events for event-driven workflow triggering with EventSources for webhooks, S3 notifications, and Kafka topics connected to Sensors triggering Argo Workflows."
+  },
+  {
+    "id": "complex-k8s-tf-009",
+    "provider": "Kubernetes",
+    "tool": "Kubernetes",
+    "prompt": "Create Kubernetes manifests for an API gateway and developer portal platform using: Kong Gateway deployed via the Kong Ingress Controller with KongPlugin CRDs implementing rate-limiting with Redis-backed counters, OpenID Connect authentication with token introspection, request-transformer adding correlation IDs, response-transformer removing server headers, ip-restriction for admin APIs, and bot-detection; Kong Developer Portal with self-service API key provisioning; a Keycloak deployment with PostgreSQL backend for identity management with realm configuration including client credentials and authorization code flows, fine-grained authorization using UMA 2.0, brute force detection, and password policies requiring complexity and rotation; and Backstage as an internal developer portal with Kubernetes plugin showing workload status, TechDocs for API documentation generated from OpenAPI specs, and custom scaffolder templates for new microservice provisioning. All components must communicate over mTLS provided by a service mesh, with NetworkPolicies ensuring the gateway can only reach backend services on specific ports, and PodSecurityStandards enforced."
+  },
+  {
+    "id": "complex-k8s-tf-010",
+    "provider": "Kubernetes",
+    "tool": "Terraform",
+    "prompt": "Deploy a Kubernetes-native disaster recovery and business continuity platform using Terraform with: Velero configured with multiple BackupStorageLocations in different cloud regions with server-side encryption and immutable backup retention policies, scheduled backups with resource filtering using label selectors and include/exclude namespace lists, and pre/post backup hooks executing application-consistent snapshots via custom scripts in annotated pods; Submariner for cross-cluster networking between primary and DR Kubernetes clusters with encrypted tunnels and service discovery, with GlobalNet for overlapping CIDR support; CloudCasa or Kasten K10 for application-aware backup of stateful workloads including Helm release metadata, PVC snapshots with CSI snapshot classes, and full application mobility between clusters; and a custom Kubernetes operator (CRDs and controller manifests) implementing automated failover logic that monitors primary cluster health via external probes, updates global DNS records via external-dns, scales up DR cluster workloads from zero replicas, restores latest Velero backups if needed, and sends notifications through multiple channels. Include comprehensive RBAC with ClusterRoles for DR operators, regular automated DR drill CronJobs that validate backup restorability in an isolated namespace, and Prometheus alerting rules for backup freshness and cross-cluster connectivity."
+  }
+]
