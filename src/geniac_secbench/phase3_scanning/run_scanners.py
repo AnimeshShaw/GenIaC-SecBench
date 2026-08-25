@@ -67,6 +67,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+def _utf8_env() -> dict:
+    """Environment for scanner subprocesses with Python UTF-8 mode forced on.
+
+    On Windows, CPython opens files with the locale codec (cp1252 here) unless
+    UTF-8 mode is enabled. Five generated files in the corpus contain bytes
+    that are valid UTF-8 but undefined in cp1252 (e.g. 0x9d), and checkov's
+    context parser reads .tf files with the default encoding -- so a single
+    such file raised UnicodeDecodeError and aborted the ENTIRE batch, writing
+    zero findings for every scenario in that model directory. This silently
+    zeroed checkov for complex/claude-3-5-sonnet (829 findings recovered once
+    fixed). PYTHONUTF8=1 makes the child interpreter decode as UTF-8.
+    """
+    env = os.environ.copy()
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
+    return env
+
 def _checkov_venv_python() -> Path:
     # GENIAC_CHECKOV_VENV lets the Docker image (which sets up the isolated
     # venv at /opt/venv_checkov, outside the repo tree) point here without
@@ -129,14 +147,16 @@ def _trivy_cmd(target_dir: str) -> list[str] | None:
     return [trivy_bin, "config", target_dir, "-f", "json", "--quiet"]
 
 
-def _kics_cmd(target_dir: str, out_file: Path) -> list[str] | None:
+def _kics_cmd(target_dir: str, out_name: str, out_dir: Path) -> list[str] | None:
+    """out_name is the full report basename WITHOUT the .json suffix; KICS
+    appends the extension itself. Never pass Path().stem here -- see batch_kics."""
     kics_bin = get_tool_path("kics")
     if kics_bin is None:
         return None
     return [
         kics_bin, "scan", "-p", target_dir,
-        "-o", str(out_file.parent), "--report-formats", "json",
-        "--output-name", out_file.stem,
+        "-o", str(out_dir), "--report-formats", "json",
+        "--output-name", out_name,
         "--exclude-paths", ".terraform,.git",
     ]
 
@@ -195,7 +215,7 @@ def batch_checkov(model_dir: Path, scenario_ids: list[str], out_base: Path) -> i
         logger.warning("checkov not available (venv missing and not on PATH). Skipping.")
         return 0
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=1800, env=_utf8_env())
         report = json.loads(result.stdout)
     except (subprocess.TimeoutExpired, json.JSONDecodeError) as e:
         logger.error("checkov batch scan failed for %s: %s", model_dir, e)
@@ -226,7 +246,7 @@ def batch_trivy(model_dir: Path, scenario_ids: list[str], out_base: Path) -> int
         logger.warning("trivy not available (not on PATH / TRIVY_PATH unset). Skipping.")
         return 0
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=1800, env=_utf8_env())
         report = json.loads(result.stdout)
     except (subprocess.TimeoutExpired, json.JSONDecodeError) as e:
         logger.error("trivy batch scan failed for %s: %s", model_dir, e)
@@ -253,12 +273,37 @@ def batch_kics(model_dir: Path, scenario_ids: list[str], out_base: Path, tmp_dir
     if kics_bin is None:
         logger.warning("kics not available (not on PATH / KICS_PATH / third_party/kics). Skipping.")
         return 0
-    out_name = f"kics_batch_{model_dir.parent.name}_{model_dir.name}"
-    out_file = tmp_dir / out_name
-    cmd = _kics_cmd(str(model_dir.resolve()), out_file)
+    # NOTE: `--output-name` must be the FULL basename, never Path().stem.
+    # Model names contain dots (gemini-3.1-pro, gemini-3.7-flash), and stem
+    # strips everything after the last dot -- so both gemini models collapsed
+    # to "kics_batch_<ds>_gemini-3", KICS wrote that file, and the reader then
+    # looked for "...gemini-3.1-pro.json" and raised FileNotFoundError. That
+    # silently zeroed KICS coverage for both models (and made them collide
+    # with each other). Keep the name and the read path derived from one
+    # variable so they cannot drift apart again.
+    # Dots must be stripped from the report basename. KICS runs its own
+    # extension handling on --output-name: given "..._gemini-3.1-pro" it treats
+    # ".1-pro" as an extension and writes a file with NO .json suffix at all,
+    # so the reader below never finds it. (Python's Path.stem had the same
+    # blind spot here, which is why this bit both ways.) Only the two gemini
+    # models contain dots, which is exactly the set that silently lost all
+    # KICS coverage. Sanitize rather than trust either layer.
+    safe_model = model_dir.name.replace(".", "_")
+    out_name = f"kics_batch_{model_dir.parent.name}_{safe_model}"
+    out_path = tmp_dir / f"{out_name}.json"
+    cmd = _kics_cmd(str(model_dir.resolve()), out_name, tmp_dir)
     try:
-        subprocess.run(cmd, cwd=str(Path(kics_bin).parent), capture_output=True, text=True, timeout=600)
-        with open(str(out_file) + ".json", "r", encoding="utf-8") as f:
+        proc = subprocess.run(cmd, cwd=str(Path(kics_bin).parent), capture_output=True, text=True, timeout=1800, env=_utf8_env())
+        # KICS uses its exit code as a severity bitmask (non-zero simply means
+        # "findings exist"), so exit status alone can't tell us about failure.
+        # The report file is the real success signal.
+        if not out_path.exists():
+            logger.error(
+                "kics batch scan for %s produced no report at %s (exit=%s). stderr tail: %s",
+                model_dir, out_path, proc.returncode, (proc.stderr or "")[-400:].strip(),
+            )
+            return 0
+        with open(out_path, "r", encoding="utf-8") as f:
             report = json.load(f)
     except (subprocess.TimeoutExpired, FileNotFoundError, json.JSONDecodeError) as e:
         logger.error("kics batch scan failed for %s: %s", model_dir, e)
@@ -269,7 +314,13 @@ def batch_kics(model_dir: Path, scenario_ids: list[str], out_base: Path, tmp_dir
         for finding_file in query.get("files", []) or []:
             sid = scenario_id_from_path(str(finding_file.get("file_name", "")), set(scenario_ids))
             if sid:
-                by_scenario[sid].append({**{k: v for k, v in query.items() if k != "files"}, "file": finding_file})
+                # Preserve KICS's OWN schema: each query carries a "files" LIST.
+                # Writing a singular "file" key here silently broke parse_results
+                # (which iterates query["files"]) for every batch-scanned model --
+                # KICS findings parsed as zero for 10 of 11 models while the JSON
+                # on disk looked populated. Keep the split output shape-identical
+                # to real KICS output so downstream parsers need no special case.
+                by_scenario[sid].append({**{k: v for k, v in query.items() if k != "files"}, "files": [finding_file]})
 
     written = 0
     for sid, findings in by_scenario.items():
