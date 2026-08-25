@@ -314,3 +314,27 @@ Complex scenarios achieve a **perfect 5.00/5.00** security-test relevance score,
 | `data/summary_reports/summary_pass_rate.csv` | Schema validation failure counts |
 | `docs/human_baseline_methodology.md` | Documentation of human dataset extraction process |
 | `docs/data_dictionary.md` | Definitions and schemas for all CSV outputs |
+
+## 13. Phase 7: Human Expert Validation & Consensus
+
+To validate the LLM-as-a-Judge (Grok 4.6), a panel of three human cloud security experts evaluated a stratified sample of 18 scenarios. 
+
+### Inter-Rater Reliability (Fleiss' Kappa)
+Among the three human experts:
+* **Real-World Plausibility:** 0.391 (Fair/Moderate)
+* **Hallucination Flag:** 0.266 (Fair)
+* **Architectural Coherence:** 0.209 (Fair)
+* **Security-Test Relevance:** 0.058 (Slight)
+
+*Insight:* Security engineers have differing subjective thresholds for architectural relevance and coherence, proving why relying on a single reviewer is dangerous and necessitating a multi-rater consensus (Majority Vote) to establish a reliable baseline.
+
+### Human Consensus vs. Grok 4.6 (AI Judge)
+Comparing the human majority vote to Grok 4.6 yields strong validation for the AI Judge on factual and plausibility metrics, but reveals a blind spot in architectural coherence.
+
+| Metric | Exact Agreement | Within +/- 1 Point | Cohen's / QWK | Interpretation |
+|---|---|---|---|---|
+| **Hallucination Flag** | 94.4% | N/A | 0.640 (Cohen) | **Substantial.** AI perfectly identifies impossible services. |
+| **Real-World Plausibility** | 66.7% | 100.0% | 0.800 (QWK) | **Almost Perfect.** AI aligns perfectly with human plausibility standards. |
+| **Security-Test Relevance** | 61.1% | 83.3% | 0.367 (QWK) | **Fair.** AI is reasonably aligned on security testing value. |
+| **Architectural Coherence** | 38.9% | 72.2% | 0.361 (QWK) | **Fair.** AI fundamentally misses practical missing components (e.g., alarm thresholds) that humans catch. |
+
