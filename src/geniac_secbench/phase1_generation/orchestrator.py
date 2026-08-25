@@ -62,10 +62,15 @@ def main():
 
     # Step 1: Generate IaC
     if not args.skip_gen:
+        # Must stay in sync with MODEL_REGISTRY in generate_iac.py.
+        # "claude-3-5-sonnet" was renamed to "claude-sonnet-4-6" (the label named a
+        # previous-generation model but the registry called the current one), and the
+        # Anthropic reasoning arm is now split into -cot (prompt-engineered) and
+        # -thinking (real extended thinking). See docs/THREATS_TO_VALIDITY.md §1.1/§1.4.
         MODELS_TO_RUN = [
-            "gpt-5", "claude-opus-4-6", "gemini-3.7-flash", "gemini-3.1-pro", 
-            "gpt-4o", "claude-3-5-sonnet", 
-            "gpt-5-thinking", "claude-opus-4-6-thinking"
+            "gpt-5", "claude-opus-4-6", "gemini-3.7-flash", "gemini-3.1-pro",
+            "gpt-4o", "claude-sonnet-4-6",
+            "gpt-5-thinking", "claude-opus-4-6-thinking", "claude-opus-4-6-cot",
         ]
         
         DATASETS = [str(PATHS.prompts / "scenarios_complex.json"), str(PATHS.prompts / "scenarios.json")]
