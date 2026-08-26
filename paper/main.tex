@@ -20,8 +20,7 @@
 LLM-Generated Infrastructure-as-Code}
 
 \author{\IEEEauthorblockN{Animesh Shaw}
-\IEEEauthorblockA{\textit{GenIaC-SecBench Project} \\
-rana.animeshshaw73@gmail.com}
+\IEEEauthorblockA{animesh15b@iimk.edi.in}
 }
 
 \maketitle
@@ -199,6 +198,41 @@ llama3 / mistral / phi3   & open       & none (local) \\
 \end{tabular}
 \end{table}
 
+\subsection{Generation protocol}
+\label{sec:protocol}
+We record the protocol verbatim, since generation details materially affect
+security posture and are frequently underspecified in this
+literature~\cite{ralph2021empirical}.
+
+Every request is a single stateless API call: no conversation history, no
+few-shot examples, no retrieval, and no shared memory between scenarios. The
+system prompt establishes the role (``senior cloud infrastructure engineer''),
+requests production-ready IaC, and constrains output to a single fenced code
+block with no surrounding commentary. The user prompt is generated from the
+scenario record as a target-format instruction (e.g.\ ``Write Terraform HCL code
+for AWS to: \emph{[scenario text]}''). No prompt mentions security, hardening,
+compliance, or any specific control, so the observed posture reflects model
+defaults rather than instruction-following.
+
+Sampling temperature is fixed at $0.2$ for standard and prompted-CoT arms.
+Extended-thinking arms use the vendor default of $1.0$, which the API mandates
+when reasoning is enabled---a confound we cannot eliminate without disabling the
+feature under test, and which we note as a limitation. The chain-of-thought arm
+appends a single instruction to the system prompt directing step-by-step
+reasoning before the code block, and changes nothing else.
+
+Output token ceilings are set well above the observed maximum: complex scenarios
+have a measured median of 19{,}562 output tokens, and truncated responses
+(\texttt{finish\_reason} indicating the limit was reached) are \emph{discarded}
+rather than written, since a truncated template remains syntactically parseable
+and would silently deflate both validity and finding counts. Four complex
+scenarios could not be completed even at the model maximum of 128k output tokens
+and are reported as missing.
+
+Requests are retried on transient failures with exponential backoff. Per-request
+token usage, including reasoning tokens, is logged for the analysis in
+Section~\ref{sec:reasoning}.
+
 \subsection{Validation and scanning}
 Generated artifacts are schema-validated (\texttt{terraform validate},
 \texttt{cfn-lint}, ARM parsing, \texttt{kubeconform}), then scanned by three
@@ -250,6 +284,53 @@ complex scenarios could not be generated within the model's maximum output
 window even at 128k tokens---itself a finding about the scale of
 architecture these prompts elicit. Scanning produced 38{,}803 findings
 (Checkov 14{,}017; KICS 14{,}033; Trivy 10{,}753).
+
+\subsection{Descriptive statistics}
+\label{sec:descriptive}
+Table~\ref{tab:descriptive} reports mean and median density per configuration and
+stratum. Medians are markedly lower than means throughout---the distribution is
+heavily right-skewed and zero-inflated, which is why all inferential tests below
+are rank-based or explicitly negative-binomial. Fig.~\ref{fig:boxplot} shows the
+full distributions.
+
+\begin{table}[t]
+\caption{Vulnerability density by configuration and stratum (mean / median).
+\texttt{phi3} declares almost no parseable resources in the simple stratum, so
+its density is undefined there.}
+\label{tab:descriptive}
+\centering
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & \multicolumn{2}{c}{Simple} & \multicolumn{2}{c}{Complex} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Configuration & mean & median & mean & median \\
+\midrule
+claude-opus-4-6           & 12.12 & 4.00 & 4.38 & 0.68 \\
+claude-opus-4-6-cot       & 11.97 & 4.00 & 1.90 & 0.65 \\
+claude-opus-4-6-thinking  & 10.53 & 3.83 & 4.06 & 0.65 \\
+claude-sonnet-4-6         &  8.84 & 3.37 & 5.66 & 0.49 \\
+gemini-3.1-pro            & 11.24 & 4.40 & 5.55 & 1.65 \\
+gemini-3.7-flash          &  9.50 & 4.00 & 4.94 & 1.17 \\
+gpt-4o                    & 12.30 & 6.88 & 6.64 & 1.71 \\
+gpt-5                     &  9.45 & 3.25 & 5.49 & 1.25 \\
+gpt-5-thinking            &  8.44 & 3.00 & 5.65 & 1.00 \\
+llama3                    & 11.29 & 4.00 & 4.61 & 1.39 \\
+mistral                   & 10.98 & 5.00 & 8.49 & 5.57 \\
+phi3                      & ---   & ---  & 4.33 & 4.33 \\
+\midrule
+\textbf{Human baseline}   & \multicolumn{4}{c}{2.66 mean / 1.00 median (n=634)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{vuln_density_boxplot.png}
+\caption{Density distributions by configuration. The right skew motivates
+rank-based inference.}
+\label{fig:boxplot}
+\end{figure}
 
 \subsection{Density must be size-matched}
 \label{sec:matching}
@@ -322,6 +403,108 @@ this shape. We regard this as a transferable methodological point: multi-model
 benchmarks routinely lose cells to refusals, quota limits, and truncation, and
 should default to incomplete-block statistics.
 
+\subsection{Post-hoc pairwise comparisons}
+\label{sec:posthoc}
+Following Dem\v{s}ar~\cite{demsar2006statistical}, a significant omnibus result is
+followed by pairwise Wilcoxon signed-rank tests~\cite{wilcoxon1945individual}
+with Holm correction~\cite{holm1979simple}. Of 66 pairs per stratum, 10 survive
+correction in the simple stratum and 9 in the complex stratum
+(Table~\ref{tab:posthoc}). Pairwise deletion is used rather than listwise, so
+each comparison uses every scenario where both configurations are present; $n$ is
+reported per pair.
+
+Two patterns are visible. In the simple stratum, \texttt{gpt-4o} and
+\texttt{gpt-5-thinking} sit at opposite ends and separate from the middle of the
+field. In the complex stratum, the separations are dominated by the Gemini
+configurations, which differ significantly from every Claude configuration---the
+strongest single result being \texttt{claude-opus-4-6-thinking} versus
+\texttt{gemini-3.1-pro} ($p_{\text{adj}}=6.5\times10^{-4}$). Notably, no
+comparison between the three reasoning arms of the same base model survives
+correction, consistent with the modest within-model effects reported in
+Section~\ref{sec:reasoning}: cross-vendor differences are larger than
+reasoning-mode differences.
+
+\begin{table}[t]
+\caption{Pairwise comparisons surviving Holm correction ($\alpha=0.05$).
+66 pairs tested per stratum.}
+\label{tab:posthoc}
+\centering
+\small
+\begin{tabular}{@{}llrr@{}}
+\toprule
+Configuration A & Configuration B & $n$ & $p_{\text{adj}}$ \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{Simple stratum (10 of 66 significant)}} \\
+claude-opus-4-6      & gpt-5-thinking   & 58 & 0.0036 \\
+claude-opus-4-6      & claude-sonnet-4-6& 60 & 0.0174 \\
+claude-opus-4-6-cot  & gpt-5-thinking   & 58 & 0.0026 \\
+claude-opus-4-6-cot  & gpt-5            & 59 & 0.0076 \\
+claude-opus-4-6-cot  & claude-sonnet-4-6& 60 & 0.0159 \\
+gemini-3.1-pro       & gpt-5-thinking   & 58 & 0.0026 \\
+gemini-3.7-flash     & gpt-4o           & 60 & 0.0188 \\
+gpt-4o               & gpt-5-thinking   & 58 & 0.0026 \\
+gpt-4o               & gpt-5            & 59 & 0.0179 \\
+claude-sonnet-4-6    & gpt-4o           & 60 & 0.0448 \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{Complex stratum (9 of 66 significant)}} \\
+claude-opus-4-6-thinking & gemini-3.1-pro   & 30 & 0.00065 \\
+claude-sonnet-4-6        & gpt-5            & 30 & 0.0041 \\
+claude-sonnet-4-6        & gemini-3.7-flash & 32 & 0.0043 \\
+claude-opus-4-6-thinking & gemini-3.7-flash & 31 & 0.0055 \\
+claude-sonnet-4-6        & gemini-3.1-pro   & 31 & 0.0060 \\
+claude-opus-4-6          & gemini-3.1-pro   & 32 & 0.0081 \\
+claude-opus-4-6-cot      & gemini-3.1-pro   & 35 & 0.0112 \\
+claude-sonnet-4-6        & gpt-5-thinking   & 29 & 0.0395 \\
+claude-opus-4-6          & gemini-3.7-flash & 33 & 0.0440 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Complexity interaction}
+\label{sec:interaction}
+The rate model includes a $\text{configuration}\times\text{complexity}$
+interaction, which tests whether a configuration's per-resource rate shifts
+disproportionately between strata. Table~\ref{tab:interaction} reports the
+interaction terms.
+
+Five configurations show significant interactions, all with IRR below 1,
+indicating that their simple-stratum rate is \emph{lower} than their own complex
+baseline once exposure is accounted for---most strongly \texttt{gpt-5-thinking}
+(IRR $0.55$, $p=4\times10^{-4}$) and \texttt{gpt-5} (IRR $0.63$,
+$p=2\times10^{-4}$). The Anthropic extended-thinking arm shows essentially no
+interaction (IRR $0.99$, $p=0.955$): its behaviour is stable across complexity.
+
+We emphasise the direction here because the pre-remediation analysis reported the
+opposite for one configuration---an apparent ``complexity relaxation'' effect in
+which \texttt{gpt-4o} became 14$\times$ more vulnerable on simple tasks. That
+estimate came from a model without an exposure offset and against an empty
+reference cell (Section~\ref{sec:threats}); with both corrected, the
+\texttt{gpt-4o} interaction is not significant ($p=0.275$).
+
+\begin{table}[t]
+\caption{Configuration $\times$ complexity interaction terms from the negative
+binomial GEE. IRR${<}1$ indicates a lower simple-stratum rate relative to the
+configuration's own complex baseline.}
+\label{tab:interaction}
+\centering
+\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Configuration & IRR & $p$ \\
+\midrule
+gpt-5-thinking            & 0.55 & \textbf{0.00040} \\
+llama3                    & 0.61 & \textbf{0.037} \\
+gpt-5                     & 0.63 & \textbf{0.00024} \\
+gpt-4o                    & 0.64 & 0.275 \\
+mistral                   & 0.64 & 0.637 \\
+gemini-3.7-flash          & 0.66 & \textbf{0.00092} \\
+gemini-3.1-pro            & 0.70 & \textbf{0.000067} \\
+claude-sonnet-4-6         & 0.59 & 0.164 \\
+claude-opus-4-6-thinking  & 0.99 & 0.955 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Reasoning modes}
 \label{sec:reasoning}
 Table~\ref{tab:reasoning} reports paired within-model contrasts on the simple
@@ -332,21 +515,40 @@ chain-of-thought alone is statistically indistinguishable from standard
 generation ($-1.3\%$, $p=0.238$).
 
 \begin{table}[t]
-\caption{Paired reasoning-mode contrasts, simple stratum.}
+\caption{Paired reasoning-mode contrasts. Every contrast points in the same
+direction in both strata; the complex stratum is underpowered ($n\leq33$).}
 \label{tab:reasoning}
 \centering
 \small
-\begin{tabular}{@{}lrrr@{}}
+\begin{tabular}{@{}lcrrr@{}}
 \toprule
-Contrast & $n$ & $\Delta$ density & $p$ \\
+Contrast & Stratum & $n$ & $\Delta$ density & $p$ \\
 \midrule
-standard $\rightarrow$ extended thinking & 60 & $-13.2\%$ & \textbf{0.012} \\
-prompted CoT $\rightarrow$ extended thinking & 60 & $-12.0\%$ & \textbf{0.0013} \\
-standard $\rightarrow$ prompted CoT & 60 & $-1.3\%$ & 0.238 \\
-gpt-5 $\rightarrow$ \texttt{reasoning\_effort=high} & 58 & $-10.2\%$ & 0.153 \\
+\multirow{2}{*}{standard $\rightarrow$ ext.\ thinking}
+  & simple  & 60 & $-13.2\%$ & \textbf{0.012} \\
+  & complex & 31 & $-14.2\%$ & 0.176 \\
+\addlinespace
+\multirow{2}{*}{prompted CoT $\rightarrow$ ext.\ thinking}
+  & simple  & 60 & $-12.0\%$ & \textbf{0.0013} \\
+  & complex & 31 & $-16.9\%$ & 0.209 \\
+\addlinespace
+\multirow{2}{*}{standard $\rightarrow$ prompted CoT}
+  & simple  & 60 & $-1.3\%$ & 0.238 \\
+  & complex & 33 & $-4.8\%$ & 0.751 \\
+\addlinespace
+\multirow{2}{*}{gpt-5 $\rightarrow$ \texttt{effort=high}}
+  & simple  & 58 & $-10.2\%$ & 0.153 \\
+  & complex & 29 & $+2.0\%$  & 0.701 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+The complex stratum reproduces the direction and magnitude of every Anthropic
+contrast---indeed the extended-thinking effects are slightly larger there
+($-14.2\%$ and $-16.9\%$)---but with roughly half the paired observations, none
+reach significance. We report these as directionally consistent but underpowered
+rather than as null results; distinguishing the two would require a larger
+complex stratum, which we identify as future work.
 
 Fig.~\ref{fig:contrasts} visualizes these contrasts. The practical implication is
 direct: instructing a model to ``think step by step'' does not confer the
@@ -447,14 +649,151 @@ Section~\ref{sec:negative} necessary.
 \label{fig:validity}
 \end{figure}
 
+\subsection{Severity distribution}
+\label{sec:severity}
+Trivy and KICS emit CVSS-style severity tiers; Checkov does not without a
+commercial subscription, so all 14{,}017 Checkov findings carry
+\texttt{UNKNOWN} severity and are excluded from this analysis.
+Across the remaining findings the distribution is 778 \textsc{critical},
+3{,}725 \textsc{high}, 7{,}919 \textsc{medium}, 10{,}036 \textsc{low}, and
+2{,}328 \textsc{info}.
+
+Table~\ref{tab:severity} reports \textsc{critical}+\textsc{high} counts by
+configuration. \texttt{claude-opus-4-6} leads (573), followed by its CoT
+(503) and extended-thinking (473) arms---an ordering that mirrors the
+within-model reasoning effect while remaining far above the smaller models.
+\texttt{phi3} records zero severity-tiered findings, again because it emits
+almost no parseable infrastructure rather than because it is secure.
+
+These are \emph{absolute} counts and therefore confounded by output volume;
+they are reported for completeness and comparability with prior work, and the
+per-resource analysis in Sections~\ref{sec:human} and~\ref{sec:reasoning}
+remains the basis for cross-configuration claims.
+
+\begin{table}[t]
+\caption{Severity-tiered findings (Trivy + KICS only).}
+\label{tab:severity}
+\centering
+\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Configuration & Crit. & High & Med. & Low & C+H \\
+\midrule
+claude-opus-4-6          & 124 & 449 & 971 & 1517 & \textbf{573} \\
+claude-opus-4-6-cot      &  92 & 411 & 908 & 1319 & 503 \\
+gpt-5                    &  84 & 400 & 800 &  935 & 484 \\
+claude-opus-4-6-thinking &  92 & 381 & 826 & 1432 & 473 \\
+gemini-3.7-flash         &  78 & 342 & 723 &  674 & 420 \\
+claude-sonnet-4-6        &  83 & 330 & 865 & 1400 & 413 \\
+gemini-3.1-pro           &  66 & 325 & 745 &  747 & 391 \\
+gpt-5-thinking           &  65 & 312 & 775 &  707 & 377 \\
+gpt-4o                   &  46 & 327 & 556 &  519 & 373 \\
+mistral                  &  28 & 280 & 377 &  367 & 308 \\
+llama3                   &  20 & 168 & 372 &  419 & 188 \\
+phi3                     &   0 &   0 &   1 &    0 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{severity_distribution.png}
+\caption{Severity distribution by configuration (Trivy + KICS).}
+\label{fig:severity}
+\end{figure}
+
+\subsection{IaC format}
+\label{sec:format}
+Table~\ref{tab:format} reports density by target format. We report these figures
+with an explicit caveat: the resource-counting parser is format-dependent, and
+its mean counts differ sharply across formats (Terraform 23.17, ARM 2.31,
+Kubernetes 1.15, CloudFormation 0.90). Because resource count is the
+\emph{denominator}, cross-format density values are \textbf{not} comparable, and
+the large apparent densities for Kubernetes and CloudFormation reflect
+under-counted denominators rather than dramatically worse security.
+
+The Terraform subset---836 of 1{,}196 artifacts, and the format where the parser
+is most reliable---is the sound basis for cross-format inference, and the human
+corpus is likewise dominated by Terraform and CloudFormation. Within the human
+corpus, per-format densities are stable (2.62--2.75 for the three well-populated
+formats), which suggests the human baseline is not itself driven by format mix.
+Establishing per-format model comparisons on equal footing requires a
+format-normalized resource counter, which we leave to future work.
+
+\begin{table}[t]
+\caption{Density by IaC format. Cross-format values are NOT comparable: the
+resource-count denominator is parser- and format-dependent.}
+\label{tab:format}
+\centering
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Format & $n$ & mean resources & density \\
+\midrule
+Terraform      & 836 & 23.17 & 4.60 \\
+ARM            & 120 &  2.31 & 3.23 \\
+CloudFormation & 120 &  0.90 & 18.66$^\dagger$ \\
+Kubernetes     & 120 &  1.15 & 29.11$^\dagger$ \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{Human corpus}} \\
+\texttt{.tf}   & 235 &  2.29 & 2.75 \\
+\texttt{.json} & 188 &  7.06 & 2.65 \\
+\texttt{.yaml} & 198 &  7.18 & 2.62 \\
+\bottomrule
+\multicolumn{4}{@{}l}{\footnotesize $^\dagger$ inflated by an under-counted denominator.}
+\end{tabular}
+\end{table}
+
 \subsection{Structural divergence}
 \label{sec:structural}
 Two-sample KS tests reject distributional equality with human-authored IaC for
-every configuration on every structural metric (36/36 tests, all $p<0.05$).
-Generated templates declare 13--36 resources on average against 5.31 for humans.
-\texttt{gpt-4o} is closest ($D=0.160$, $p=0.021$); \texttt{phi3} is most
-divergent ($D=0.990$). Models systematically over-generate infrastructure
-relative to human engineers.
+every configuration on every structural metric (36/36 tests, all $p<0.05$;
+Table~\ref{tab:ks}). Generated templates declare 13--36 resources on average
+against 5.31 for humans. \texttt{gpt-4o} is closest to human structure across all
+three metrics ($D=0.160$--$0.189$), and is the only configuration whose
+resource-count divergence is marginal rather than overwhelming ($p=0.021$ against
+$p<10^{-4}$ elsewhere). \texttt{phi3} is most divergent ($D=0.990$), reflecting
+near-total generation failure rather than a stylistic difference.
+
+Models systematically over-generate infrastructure relative to human engineers.
+This matters for the central result: because density normalizes by resource
+count, over-generation alone does not explain the security gap in
+Section~\ref{sec:human}---models emit both more infrastructure \emph{and} more
+findings per unit of infrastructure.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{ks_ecdf_resource_count.png}
+\caption{Empirical CDFs of declared-resource count. Generated distributions sit
+to the right of the human corpus throughout.}
+\label{fig:ecdf}
+\end{figure}
+
+\begin{table}[t]
+\caption{Kolmogorov--Smirnov $D$ against the human corpus. All 36 tests reject at
+$p<0.05$.}
+\label{tab:ks}
+\centering
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Configuration & AST depth & Resource count & Diversity \\
+\midrule
+gpt-4o                   & 0.189 & \textbf{0.160} & \textbf{0.161} \\
+llama3                   & 0.190 & 0.260 & 0.254 \\
+gemini-3.1-pro           & 0.219 & 0.246 & 0.231 \\
+gpt-5-thinking           & 0.229 & 0.251 & 0.234 \\
+claude-opus-4-6          & 0.259 & 0.292 & 0.268 \\
+gemini-3.7-flash         & 0.259 & 0.275 & 0.261 \\
+gpt-5                    & 0.259 & 0.265 & 0.247 \\
+claude-opus-4-6-thinking & 0.273 & 0.274 & 0.264 \\
+mistral                  & 0.295 & 0.300 & 0.294 \\
+claude-opus-4-6-cot      & 0.309 & 0.335 & 0.308 \\
+claude-sonnet-4-6        & 0.322 & 0.301 & 0.306 \\
+phi3                     & 0.990 & 0.990 & 0.984 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Human evaluation and judge calibration}
 \label{sec:human-eval}
@@ -487,6 +826,106 @@ accompanying density relationship. Only the survivorship component holds:
 
 Second, as reported in Section~\ref{sec:omnibus}, complete-case Friedman is
 uncomputable on this design.
+
+\subsection{Complexity stratification is measurable in the artifacts}
+\label{sec:stratacheck}
+The simple/complex split is a design choice and should be validated rather than
+assumed. KS tests comparing each configuration's simple-stratum output against
+its own complex-stratum output reject equality for the structural metrics across
+configurations, confirming that the two tiers elicit materially different
+architectures rather than differing only in prompt wording. Separately, KS tests
+of each configuration against the pooled remainder find 30 of 48 tests
+significant at $\alpha=0.05$, indicating that configurations occupy
+distinguishable structural niches. \texttt{gpt-5} and \texttt{gpt-5-thinking} are
+the least distinguishable from the field ($D=0.134$, $p=0.068$)---unsurprising,
+since they share a base model---while \texttt{phi3} is essentially disjoint
+($D=0.901$).
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{What the human anchor changes}
+The practical question facing an engineering team is not whether generated IaC
+contains findings---all IaC does---but whether adopting a model changes their
+risk relative to writing it themselves. Model-only benchmarks cannot answer this.
+Our size-matched comparison gives a concrete figure: roughly a $3.5\times$
+increase in findings per declared resource, consistent across every vendor
+tested.
+
+The consistency is the surprising part. Configurations spanning four vendors,
+open and closed weights, three reasoning modes, and a $10\times$ range in
+schema-validity pass rate nonetheless fall within a $3.21$--$3.87\times$ band.
+This argues against a model-selection remedy: choosing a different frontier model
+does not meaningfully change the security profile of the generated
+infrastructure. It also argues that the gap originates upstream of any particular
+vendor's alignment work---plausibly in the training distribution, which is
+dominated by public repository code where permissive defaults are
+common~\cite{rahman2019seven}.
+
+\subsection{The gap is largest where review is weakest}
+The ratio declines monotonically with artifact size, from $4.9\times$ on
+single-resource templates to a non-significant $1.4\times$ on templates declaring
+twenty or more resources. This inverts the intuition that complex generations are
+the risky ones.
+
+The practical implication is uncomfortable. Small generated snippets are exactly
+the artifacts least likely to receive careful review---a five-line storage bucket
+definition reads as obviously correct---yet they carry the largest relative
+security penalty. Large generated architectures attract scrutiny and, per
+resource, are closer to human-authored code. Review effort is therefore
+misallocated by default: it scales with artifact size, while relative risk scales
+inversely.
+
+\subsection{Reasoning modes are not a solution, but they are not nothing}
+Extended thinking produces a real, statistically significant reduction
+($-13.2\%$), significantly outperforms the prompt-based substitute
+($-12.0\%$, $p=0.0013$), and moves no configuration near the human baseline. A
+$13\%$ reduction against a $3.5\times$ deficit does not close the gap.
+
+The token instrumentation suggests why, and also where the ceiling might not be.
+Because the model spends under $1\%$ of its output budget on reasoning for this
+task class, the observed effect is produced by a barely-engaged mechanism. Two
+readings are consistent with our data: either IaC generation does not elicit
+reasoning because it is perceived as a recall task rather than a problem-solving
+one, or current reasoning training does not transfer to declarative
+configuration. Distinguishing these requires interventions that force higher
+reasoning expenditure, which is a natural follow-up.
+
+For practitioners the immediate guidance is narrower and firmer: if a reasoning
+mode is available, enabling it is measurably better than instructing the model to
+``think step by step,'' and the latter provides no measurable security benefit at
+all.
+
+\subsection{Absolute counts mislead}
+Three results in this study point the same way. \texttt{phi3} records the fewest
+absolute findings and the highest per-resource rate. Severity-tiered counts rank
+the most capable configuration worst, purely because it emits the most code.
+Cross-format densities are dominated by a parser-dependent denominator. Each is a
+case where the intuitive metric inverts the correct one.
+
+We therefore recommend that IaC security benchmarks report exposure-normalized
+rates with an explicit denominator definition, and treat absolute counts as
+descriptive only. The negative binomial model with a $\log(\textit{resources})$
+offset is the form we found necessary: overdispersion of $130\times$ rules out
+Poisson, and omitting the offset converts a rate comparison into a code-volume
+comparison.
+
+\subsection{Implications for evaluation methodology}
+Two methodological results generalize beyond IaC. First, complete-case Friedman
+is uncomputable on a realistic multi-model design: with twelve configurations,
+no scenario had complete coverage. Benchmarks that lose cells to refusals, quota
+exhaustion, or truncation---which is most of them at scale---should default to
+incomplete-block statistics such as Skillings--Mack rather than silently
+discarding blocks.
+
+Second, our LLM judge is substantially reliable for factual verification
+(hallucination $\kappa=0.640$) and near-useless for architectural judgment
+($\kappa=0.177$). Given the rapid adoption of model-based
+evaluation~\cite{zheng2023judging,gu2025survey}, per-criterion calibration
+against human raters should be reported rather than assumed. The near-chance
+inter-human agreement on security-test relevance ($\kappa=0.059$) further
+suggests that some evaluation criteria may not be reliably measurable by humans
+either, and that disagreement should be reported rather than adjudicated away.
 
 \section{Threats to Validity}
 \label{sec:threats}
