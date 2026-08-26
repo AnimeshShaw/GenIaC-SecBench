@@ -1,0 +1,143 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{rahman2019seven,verdet2023exploring}
+\citation{pearce2022asleep,sandoval2023lost,tihanyi2025secure}
+\citation{perry2023users}
+\citation{vargas2026securityfirst}
+\citation{skillings1981distribution}
+\citation{pearce2022asleep}
+\citation{perry2023users,sandoval2023lost}
+\citation{tihanyi2025secure}
+\citation{siddiq2022securityeval}
+\citation{liu2023your}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {II}Background and Related Work}{1}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Security of LLM-generated code}{1}{subsection.2.1}\protected@file@percent }
+\citation{rahman2019seven}
+\citation{saavedra2023glitch}
+\citation{verdet2023exploring,rahman2019systematic}
+\citation{checkov}
+\citation{trivy}
+\citation{kics}
+\citation{cis_benchmarks}
+\citation{vargas2026securityfirst}
+\citation{wei2022chain,kojima2022large}
+\citation{sprague2025cot}
+\citation{openai2024o1,deepseek2025r1,anthropic2025thinking}
+\citation{zheng2023judging,gu2025survey}
+\citation{panickssery2024llm}
+\citation{checkov}
+\citation{trivy}
+\citation{kics}
+\citation{skillings1981distribution}
+\citation{friedman1937use}
+\citation{wilcoxon1945individual}
+\citation{holm1979simple}
+\citation{demsar2006statistical}
+\citation{liang1986longitudinal,hilbe2011negative}
+\citation{mann1947test}
+\citation{massey1951kolmogorov}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}IaC security}{2}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Reasoning modes}{2}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}LLM-as-a-judge}{2}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Methodology}{2}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Scenarios}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Model configurations. The three Claude Opus 4.6 rows differ only in reasoning mode, isolating that variable.}}{2}{table.1}\protected@file@percent }
+\newlabel{tab:models}{{I}{2}{Model configurations. The three Claude Opus 4.6 rows differ only in reasoning mode, isolating that variable}{table.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Model configurations}{2}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Validation and scanning}{2}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}The human reference corpus}{2}{subsection.3.4}\protected@file@percent }
+\newlabel{sec:corpus}{{\mbox  {III-D}}{2}{The human reference corpus}{subsection.3.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Metrics}{2}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-F}}Statistical procedure}{2}{subsection.3.6}\protected@file@percent }
+\citation{demsar2006statistical}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Vulnerability density declines with artifact size in both corpora, requiring size-matched comparison.}}{3}{figure.1}\protected@file@percent }
+\newlabel{fig:densres}{{1}{3}{Vulnerability density declines with artifact size in both corpora, requiring size-matched comparison}{figure.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Results}{3}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Corpus}{3}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Density must be size-matched}{3}{subsection.4.2}\protected@file@percent }
+\newlabel{sec:matching}{{\mbox  {IV-B}}{3}{Density must be size-matched}{subsection.4.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}LLM-generated IaC is consistently less secure than human IaC}{3}{subsection.4.3}\protected@file@percent }
+\newlabel{sec:human}{{\mbox  {IV-C}}{3}{LLM-generated IaC is consistently less secure than human IaC}{subsection.4.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Size-matched comparison against the human baseline. $^{*}p<0.05$, $^{**}p<0.01$, $^{***}p<0.001$ (Mann--Whitney $U$).}}{3}{figure.2}\protected@file@percent }
+\newlabel{fig:humanvsllm}{{2}{3}{Size-matched comparison against the human baseline. $^{*}p<0.05$, $^{**}p<0.01$, $^{***}p<0.001$ (Mann--Whitney $U$)}{figure.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Per-configuration density relative to the human baseline. Purple: vendor extended thinking. Green: prompted chain-of-thought.}}{3}{figure.3}\protected@file@percent }
+\newlabel{fig:ratio}{{3}{3}{Per-configuration density relative to the human baseline. Purple: vendor extended thinking. Green: prompted chain-of-thought}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Models differ, but the classical test cannot show it}{3}{subsection.4.4}\protected@file@percent }
+\newlabel{sec:omnibus}{{\mbox  {IV-D}}{3}{Models differ, but the classical test cannot show it}{subsection.4.4}{}}
+\citation{sprague2025cot}
+\citation{cis_benchmarks}
+\citation{rahman2019seven}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Paired reasoning-mode contrasts, simple stratum.}}{4}{table.2}\protected@file@percent }
+\newlabel{tab:reasoning}{{II}{4}{Paired reasoning-mode contrasts, simple stratum}{table.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Paired reasoning-mode contrasts on the simple stratum. Green bars are significant at $\alpha =0.05$.}}{4}{figure.4}\protected@file@percent }
+\newlabel{fig:contrasts}{{4}{4}{Paired reasoning-mode contrasts on the simple stratum. Green bars are significant at $\alpha =0.05$}{figure.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-E}}Reasoning modes}{4}{subsection.4.5}\protected@file@percent }
+\newlabel{sec:reasoning}{{\mbox  {IV-E}}{4}{Reasoning modes}{subsection.4.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-F}}Rate model}{4}{subsection.4.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Reasoning-token expenditure under extended thinking. The mechanism is barely engaged on IaC generation.}}{4}{figure.5}\protected@file@percent }
+\newlabel{fig:tokens}{{5}{4}{Reasoning-token expenditure under extended thinking. The mechanism is barely engaged on IaC generation}{figure.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-G}}What models get wrong, and what the engines disagree about}{4}{subsection.4.7}\protected@file@percent }
+\newlabel{sec:categories}{{\mbox  {IV-G}}{4}{What models get wrong, and what the engines disagree about}{subsection.4.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-H}}Schema validity}{4}{subsection.4.8}\protected@file@percent }
+\newlabel{sec:validity}{{\mbox  {IV-H}}{4}{Schema validity}{subsection.4.8}{}}
+\citation{fleiss1971measuring}
+\citation{landis1977measurement}
+\citation{cohen1960coefficient}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Findings by CIS category and configuration. ``Other'' reflects rules without a clean CIS mapping and should not be read as a vulnerability class.}}{5}{figure.6}\protected@file@percent }
+\newlabel{fig:cis}{{6}{5}{Findings by CIS category and configuration. ``Other'' reflects rules without a clean CIS mapping and should not be read as a vulnerability class}{figure.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Findings by engine. Volume disagreement across three independent vendors motivates multi-engine evaluation.}}{5}{figure.7}\protected@file@percent }
+\newlabel{fig:scanner}{{7}{5}{Findings by engine. Volume disagreement across three independent vendors motivates multi-engine evaluation}{figure.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-I}}Structural divergence}{5}{subsection.4.9}\protected@file@percent }
+\newlabel{sec:structural}{{\mbox  {IV-I}}{5}{Structural divergence}{subsection.4.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-J}}Human evaluation and judge calibration}{5}{subsection.4.10}\protected@file@percent }
+\newlabel{sec:human-eval}{{\mbox  {IV-J}}{5}{Human evaluation and judge calibration}{subsection.4.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Schema-validity pass rate by configuration.}}{5}{figure.8}\protected@file@percent }
+\newlabel{fig:validity}{{8}{5}{Schema-validity pass rate by configuration}{figure.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-K}}Two negative results}{5}{subsection.4.11}\protected@file@percent }
+\newlabel{sec:negative}{{\mbox  {IV-K}}{5}{Two negative results}{subsection.4.11}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Threats to Validity}{5}{section.5}\protected@file@percent }
+\newlabel{sec:threats}{{V}{5}{Threats to Validity}{section.5}{}}
+\bibstyle{IEEEtran}
+\bibdata{references}
+\bibcite{rahman2019seven}{1}
+\bibcite{verdet2023exploring}{2}
+\bibcite{pearce2022asleep}{3}
+\bibcite{sandoval2023lost}{4}
+\bibcite{tihanyi2025secure}{5}
+\bibcite{perry2023users}{6}
+\bibcite{vargas2026securityfirst}{7}
+\bibcite{skillings1981distribution}{8}
+\bibcite{siddiq2022securityeval}{9}
+\bibcite{liu2023your}{10}
+\bibcite{saavedra2023glitch}{11}
+\bibcite{rahman2019systematic}{12}
+\bibcite{checkov}{13}
+\bibcite{trivy}{14}
+\bibcite{kics}{15}
+\bibcite{cis_benchmarks}{16}
+\bibcite{wei2022chain}{17}
+\bibcite{kojima2022large}{18}
+\bibcite{sprague2025cot}{19}
+\bibcite{openai2024o1}{20}
+\bibcite{deepseek2025r1}{21}
+\bibcite{anthropic2025thinking}{22}
+\bibcite{zheng2023judging}{23}
+\bibcite{gu2025survey}{24}
+\bibcite{panickssery2024llm}{25}
+\bibcite{friedman1937use}{26}
+\bibcite{wilcoxon1945individual}{27}
+\bibcite{holm1979simple}{28}
+\bibcite{demsar2006statistical}{29}
+\bibcite{liang1986longitudinal}{30}
+\bibcite{hilbe2011negative}{31}
+\bibcite{mann1947test}{32}
+\bibcite{massey1951kolmogorov}{33}
+\bibcite{fleiss1971measuring}{34}
+\bibcite{landis1977measurement}{35}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Conclusion and Future Work}{6}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{6}{section*.2}\protected@file@percent }
+\bibcite{cohen1960coefficient}{36}
+\gdef \@abspage@last{7}

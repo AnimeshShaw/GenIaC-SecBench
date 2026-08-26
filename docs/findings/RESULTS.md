@@ -4,7 +4,7 @@
 
 ## 1. Corpus and coverage
 
-- **1,194** (scenario x model) observations, one per generated file.
+- **1,196** (scenario x model) observations, one per generated file.
 - **12** model arms, **100** distinct scenarios.
 
 | model | simple | complex | total |
@@ -12,7 +12,7 @@
 | `claude-opus-4-6` | 60 | 40 | 100 |
 | `claude-opus-4-6-cot` | 60 | 40 | 100 |
 | `claude-opus-4-6-thinking`  *(incomplete)* | 60 | 39 | 99 |
-| `claude-sonnet-4-6`  *(incomplete)* | 60 | 35 | 95 |
+| `claude-sonnet-4-6`  *(incomplete)* | 60 | 37 | 97 |
 | `gemini-3.1-pro` | 60 | 40 | 100 |
 | `gemini-3.7-flash` | 60 | 40 | 100 |
 | `gpt-4o` | 60 | 40 | 100 |
@@ -26,9 +26,9 @@
 
 | scanner | covered | total | % |
 |---|---:|---:|---:|
-| checkov | 1194 | 1194 | 100.0% |
-| kics | 1194 | 1194 | 100.0% |
-| trivy | 1194 | 1194 | 100.0% |
+| checkov | 1196 | 1196 | 100.0% |
+| kics | 1196 | 1196 | 100.0% |
+| trivy | 1196 | 1196 | 100.0% |
 
 ## 2. Vulnerability density by model
 
@@ -64,7 +64,7 @@ Density = total findings across all three scanners / resource count. Resource co
 | `gpt-5` | 40 | 40.10 | 75.65 | **5.49** |
 | `gemini-3.1-pro` | 40 | 28.65 | 58.05 | **5.55** |
 | `gpt-5-thinking` | 40 | 44.77 | 58.60 | **5.65** |
-| `claude-sonnet-4-6` | 35 | 85.20 | 64.20 | **5.82** |
+| `claude-sonnet-4-6` | 37 | 87.16 | 83.65 | **5.66** |
 | `gpt-4o` | 40 | 12.40 | 38.58 | **6.64** |
 | `mistral` | 40 | 4.75 | 26.05 | **8.49** |
 
@@ -72,15 +72,15 @@ Density = total findings across all three scanners / resource count. Resource co
 
 | model | valid | total | pass rate |
 |---|---:|---:|---:|
-| `gemini-3.7-flash` | 34 | 100 | 34.0% |
-| `gemini-3.1-pro` | 34 | 100 | 34.0% |
-| `claude-opus-4-6` | 33 | 100 | 33.0% |
-| `claude-opus-4-6-cot` | 32 | 100 | 32.0% |
-| `gpt-4o` | 32 | 100 | 32.0% |
-| `claude-sonnet-4-6` | 30 | 95 | 31.6% |
-| `claude-opus-4-6-thinking` | 31 | 99 | 31.3% |
+| `claude-opus-4-6-cot` | 35 | 100 | 35.0% |
+| `claude-opus-4-6` | 34 | 100 | 34.0% |
+| `claude-opus-4-6-thinking` | 32 | 99 | 32.3% |
+| `gemini-3.1-pro` | 32 | 100 | 32.0% |
+| `claude-sonnet-4-6` | 30 | 97 | 30.9% |
+| `gemini-3.7-flash` | 30 | 100 | 30.0% |
+| `gpt-4o` | 30 | 100 | 30.0% |
 | `gpt-5` | 28 | 100 | 28.0% |
-| `gpt-5-thinking` | 26 | 100 | 26.0% |
+| `gpt-5-thinking` | 27 | 100 | 27.0% |
 | `mistral` | 8 | 100 | 8.0% |
 | `llama3` | 6 | 100 | 6.0% |
 | `phi3` | 5 | 100 | 5.0% |
@@ -92,7 +92,7 @@ Metric: `total_vulns_norm`. Primary test: **Skillings-Mack (handles incomplete b
 | stratum | Skillings-Mack chi2 | df | p | blocks used | complete-case Friedman N | blocks discarded |
 |---|---:|---:|---:|---:|---:|---:|
 | simple | 69.32 | 10 | 6.01e-11 | 60 | 0 | 60 |
-| complex | 82.85 | 11 | 4.14e-13 | 40 | 0 | 40 |
+| complex | 81.18 | 11 | 8.74e-13 | 40 | 0 | 40 |
 
 > **Note.** Complete-case Friedman retains **zero** blocks in at least one stratum: with this many arms and uneven coverage, no scenario has every model present. The classical test is not merely weaker here, it is uncomputable -- which is why Skillings-Mack is the primary test.
 
@@ -117,23 +117,23 @@ Paired within-model comparisons -- same model, same scenarios, one variable togg
 
 - Reference model: `claude-opus-4-6`
 - Exposure offset: `log(resource_count)` -- coefficients are rate ratios **per resource**
-- Overdispersion variance/mean = **130.0** (Poisson requires 1, so NB2 is required)
-- Rows fitted 997 of 1194; 197 excluded for zero exposure
+- Overdispersion variance/mean = **138.6** (Poisson requires 1, so NB2 is required)
+- Rows fitted 999 of 1196; 197 excluded for zero exposure
 - Outcome filtering: NONE. All observations retained, including zero-count rows and zero-count scenarios (v1 dropped these).
 
 | model | IRR | 95% CI | p |
 |---|---:|---|---:|
-| `claude-opus-4-6-cot` | 0.73 | [0.54, 0.99] | 0.0411 **\*** |
-| `claude-opus-4-6-thinking` | 0.87 | [0.75, 1.01] | 0.0701 |
-| `gemini-3.7-flash` | 1.19 | [0.98, 1.44] | 0.0850 |
+| `claude-opus-4-6-cot` | 0.73 | [0.54, 0.99] | 0.0410 **\*** |
+| `claude-opus-4-6-thinking` | 0.87 | [0.75, 1.01] | 0.0700 |
+| `gemini-3.7-flash` | 1.19 | [0.98, 1.44] | 0.0846 |
 | `gpt-5` | 1.23 | [1.02, 1.47] | 0.0280 **\*** |
+| `claude-sonnet-4-6` | 1.24 | [0.60, 2.53] | 0.5611 |
 | `gpt-5-thinking` | 1.24 | [1.01, 1.53] | 0.0424 **\*** |
-| `claude-sonnet-4-6` | 1.25 | [0.59, 2.65] | 0.5598 |
 | `gemini-3.1-pro` | 1.30 | [1.15, 1.47] | 2.23e-05 **\*** |
-| `mistral` | 1.33 | [0.22, 8.21] | 0.7586 |
-| `llama3` | 1.46 | [0.97, 2.20] | 0.0710 |
+| `mistral` | 1.33 | [0.22, 8.22] | 0.7579 |
+| `llama3` | 1.46 | [0.97, 2.21] | 0.0694 |
 | `gpt-4o` | 1.58 | [0.73, 3.43] | 0.2472 |
-| `phi3` | 4.64 | [3.12, 6.89] | 2.92e-14 **\*** |
+| `phi3` | 4.63 | [3.12, 6.87] | 2.44e-14 **\*** |
 
 ## 8. Structural divergence from human-authored IaC
 
@@ -150,9 +150,9 @@ Two-sample Kolmogorov-Smirnov, each model against the 634-file human reference c
 claude-opus-4-6-thinking          ast_depth      0.272791  4.039800e-06   10.101010    8.940063
 claude-opus-4-6-thinking     resource_count      0.274002  3.582704e-06   27.323232    5.309148
 claude-opus-4-6-thinking resource_diversity      0.263901  9.395876e-06   12.333333    3.787066
-       claude-sonnet-4-6          ast_depth      0.309580  1.595034e-07   10.884211    8.940063
-       claude-sonnet-4-6     resource_count      0.286336  1.724739e-06   34.410526    5.309148
-       claude-sonnet-4-6 resource_diversity      0.291582  1.023701e-06   14.694737    3.787066
+       claude-sonnet-4-6          ast_depth      0.321734  3.095894e-08   10.969072    8.940063
+       claude-sonnet-4-6     resource_count      0.300660  3.104162e-07   36.206186    5.309148
+       claude-sonnet-4-6 resource_diversity      0.306124  1.733639e-07   15.092784    3.787066
           gemini-3.1-pro          ast_depth      0.219054  4.005370e-04   10.100000    8.940063
           gemini-3.1-pro     resource_count      0.246404  4.159699e-05   13.220000    5.309148
           gemini-3.1-pro resource_diversity      0.230662  1.586527e-04    9.040000    3.787066
@@ -178,35 +178,53 @@ claude-opus-4-6-thinking resource_diversity      0.263901  9.395876e-06   12.333
 
 ```json
 {
-  "fleiss_kappa_inter_human": {
-    "n_raters": 3,
-    "n_subjects": 18,
-    "architectural_coherence": 0.2098,
-    "real_world_plausibility": 0.391,
-    "security_test_relevance": 0.0588,
-    "hallucination_flag": 0.2663
+  "_schema": "geniac-secbench/agreement/v2",
+  "n_raters": 3,
+  "rater_files": [
+    "human_review_R1.csv",
+    "human_review_R2.csv",
+    "human_review_R3.csv"
+  ],
+  "n_scenarios_common": 18,
+  "note": "Kappa requires complete blocks, so all statistics use the intersection of scenarios scored by every rater.",
+  "fleiss_kappa": {
+    "architectural_coherence": 0.20975609756097577,
+    "real_world_plausibility": 0.3909774436090227,
+    "security_test_relevance": 0.05882352941176462,
+    "hallucination_flag": 0.26630434782608686
   },
-  "consensus_vs_grok_4_6": {
+  "human_vs_judge": {
     "architectural_coherence": {
-      "exact_agreement_pct": 38.9,
-      "within_one_point_pct": 72.2,
-      "quadratic_weighted_kappa": 0.361
+      "exact_agreement": 0.2777777777777778,
+      "kappa": 0.17699115044247793,
+      "kappa_type": "quadratic_weighted",
+      "within_one": 0.6666666666666666
     },
     "real_world_plausibility": {
-      "exact_agreement_pct": 66.7,
-      "within_one_point_pct": 100.0,
-      "quadratic_weighted_kappa": 0.8
+      "exact_agreement": 0.7222222222222222,
+      "kappa": 0.7945205479452055,
+      "kappa_type": "quadratic_weighted",
+      "within_one": 1.0
     },
     "security_test_relevance": {
-      "exact_agreement_pct": 61.1,
-      "within_one_point_pct": 83.3,
-      "quadratic_weighted_kappa": 0.367
+      "exact_agreement": 0.6111111111111112,
+      "kappa": 0.48908296943231433,
+      "kappa_type": "quadratic_weighted",
+      "within_one": 0.8888888888888888
     },
     "hallucination_flag": {
-      "exact_agreement_pct": 94.4,
-      "cohens_kappa": 0.64
+      "exact_agreement": 0.9444444444444444,
+      "kappa": 0.64,
+      "kappa_type": "cohen"
     }
-  }
+  },
+  "consensus_ties_broken": {
+    "architectural_coherence": 2,
+    "real_world_plausibility": 3,
+    "security_test_relevance": 4,
+    "hallucination_flag": 0
+  },
+  "n_scenarios_compared": 18
 }
 ```
 

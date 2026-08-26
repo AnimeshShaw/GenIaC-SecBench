@@ -4,11 +4,28 @@
 
 This repository contains the evaluation pipeline, statistical analysis code, and LLM-as-a-Judge infrastructure for the GenIaC-SecBench research project.
 
-## Key Finding: The Validity-Security Paradox
+## Key Finding: LLM-generated IaC is ~3.5x less secure than human-authored IaC
 
-Our evaluation of 11 frontier and open-source LLMs across 100 deployment scenarios reveals a critical paradox: **the models most capable of writing functionally deployable Infrastructure-as-Code (IaC) are not the most secure by default**, and the models with the lowest vulnerability counts often achieve that only by failing to generate valid code at all (survivorship bias). Extended "thinking" modes show a large *practical* reduction in vulnerability density, though establishing statistical significance for that effect required closing the scanner-coverage gaps documented in `docs/THREATS_TO_VALIDITY.md`.
+Measured against 634 hand-written IaC templates through an identical toolchain and
+**matched on artifact size**, every one of 12 model configurations produces
+**3.21x-3.87x** the vulnerability density of human engineers -- across four vendors,
+open and closed weights, and three reasoning modes. The gap is **widest on the
+simplest tasks** (4.9x at one declared resource, 1.4x at twenty or more).
 
-Full results: `docs/findings/comprehensive_findings.md`. Claim-by-claim statistical evidence: `docs/findings/claims_and_statistical_evidence.md`.
+Vendor extended-thinking modes reduce density modestly but significantly
+(-13.2%, p=0.012) and meaningfully outperform prompted chain-of-thought
+(-12.0%, p=0.0013), which on its own confers no measurable security benefit.
+Instrumenting the API shows why the effect is bounded: extended thinking consumes
+**under 1% of the output budget** on this task class.
+
+We also report two negative results: the intuitive "validity-security paradox"
+is **not supported** (r=0.158, p=0.625), and complete-case Friedman testing is
+**uncomputable** on realistic benchmark designs, motivating Skillings-Mack.
+
+Full results: `docs/findings/RESULTS.md` (generated from data). Interpretation:
+`docs/findings/comprehensive_findings.md`. Claim-by-claim evidence:
+`docs/findings/claims_and_statistical_evidence.md`. Corrections and limitations:
+`docs/THREATS_TO_VALIDITY.md`.
 
 ## Repository Architecture
 
