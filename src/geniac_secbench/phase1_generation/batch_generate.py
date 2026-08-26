@@ -62,6 +62,10 @@ PRICING = {
 }
 BATCH_DISCOUNT = 0.5
 
+# Output ceiling for adaptive-thinking batch requests. Must exceed
+# (template tokens + reasoning tokens); see build_params for why 32k was too low.
+BATCH_THINKING_MAX_TOKENS = 64000
+
 
 def _strip_provider(model_id: str) -> str:
     """litellm ids are 'anthropic/<model>'; the SDK wants the bare model name."""
@@ -106,9 +110,18 @@ def build_params(model_label: str, model_id: str, scenario: dict, thinking_mode:
             # Current recommended API for Opus 4.6; budget_tokens is deprecated
             # there. Adaptive lets the model size its own reasoning and
             # auto-enables interleaved thinking.
+            #
+            # max_tokens must cover the TEMPLATE **plus** the reasoning, because
+            # adaptive thinking bills and counts thinking as output. Complex
+            # scenarios already run ~20k tokens of Terraform on their own, so the
+            # earlier 32k ceiling truncated 12 of 31 complex generations
+            # (stop_reason=max_tokens); they were refused rather than written,
+            # which then showed up downstream as missing rows. Opus 4.6 allows up
+            # to 128k output, and batch requests have no HTTP-timeout pressure,
+            # so there is no reason to run this close to the edge.
             params["thinking"] = {"type": "adaptive"}
             params["output_config"] = {"effort": REASONING_EFFORT}
-            params["max_tokens"] = MAX_OUTPUT_TOKENS
+            params["max_tokens"] = BATCH_THINKING_MAX_TOKENS
         else:
             # Transitional escape hatch: fixed ceiling. Requires temperature=1
             # and max_tokens > budget_tokens.
