@@ -40,6 +40,21 @@ def main():
     # Can extract from schema_validity which should have all pairs
     schema_validity['complexity'] = schema_validity['dataset'].replace({'simple': 'simple', 'complex': 'complex'})
     
+    # Defensive dedupe. schema_validity.csv is written in APPEND mode so partial
+    # progress survives a crash, and validate_iac collapses it at the end of its
+    # run -- but an interrupted or timed-out validation never reaches that step
+    # and leaves a partial second copy behind. This table is the row-spine of the
+    # master table, so duplicates here multiply into every downstream statistic
+    # (an earlier run reached 2,115 rows for 1,132 files and silently doubled
+    # every model's counts). Never trust its row count; always collapse on the
+    # key here as well.
+    n_raw = len(schema_validity)
+    schema_validity = schema_validity.drop_duplicates(
+        subset=['dataset', 'model', 'scenario_id'], keep='last')
+    if len(schema_validity) != n_raw:
+        logging.warning("schema_validity: collapsed %d duplicate row(s) (%d -> %d).",
+                        n_raw - len(schema_validity), n_raw, len(schema_validity))
+
     base_df = schema_validity[['scenario_id', 'model', 'dataset', 'is_valid']].copy()
     base_df = base_df.rename(columns={'dataset': 'complexity', 'is_valid': 'terraform_valid'})
 

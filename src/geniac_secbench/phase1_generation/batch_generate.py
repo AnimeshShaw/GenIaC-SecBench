@@ -64,7 +64,13 @@ BATCH_DISCOUNT = 0.5
 
 # Output ceiling for adaptive-thinking batch requests. Must exceed
 # (template tokens + reasoning tokens); see build_params for why 32k was too low.
-BATCH_THINKING_MAX_TOKENS = 64000
+BATCH_THINKING_MAX_TOKENS = 128000   # model maximum; a handful of complex
+# scenarios (complex-azure-tf-003, complex-k8s-tf-003/004) truncated even at
+# 64k, so this sits at the ceiling Opus 4.6 / Sonnet 4.6 allow.
+
+# Base output ceiling for non-reasoning requests. Complex templates measure ~20k
+# output tokens (median 19,562), so this must sit well above that.
+BATCH_COMPLEX_MAX_TOKENS = 128000
 
 
 def _strip_provider(model_id: str) -> str:
@@ -95,9 +101,17 @@ def build_params(model_label: str, model_id: str, scenario: dict, thinking_mode:
     is_cot = model_label.endswith("-cot")
     is_thinking = model_label.endswith("-thinking")
     system_prompt = SYSTEM_PROMPT
+
+    # The base ceiling must fit the LARGEST expected template, not a typical one.
+    # Complex scenarios routinely emit ~20k tokens of Terraform (measured median
+    # 19,562), so the original 8,000 truncated every complex generation on the
+    # non-reasoning paths -- all 5 claude-sonnet-4-6 complex requests came back
+    # stop_reason=max_tokens and were refused. Truncation is silent in the sense
+    # that it costs full price and yields nothing usable, so err high: batch
+    # requests have no HTTP-timeout pressure and unused headroom is not billed.
     params = {
         "model": _strip_provider(model_id),
-        "max_tokens": 8000,
+        "max_tokens": BATCH_COMPLEX_MAX_TOKENS,
         "messages": [{"role": "user", "content": build_user_prompt(scenario)}],
     }
 
