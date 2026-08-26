@@ -42,6 +42,30 @@ def main():
     
     base_df = schema_validity[['scenario_id', 'model', 'dataset', 'is_valid']].copy()
     base_df = base_df.rename(columns={'dataset': 'complexity', 'is_valid': 'terraform_valid'})
+
+    # Drop rows for (dataset, model, scenario) triples with NO generated file.
+    #
+    # schema_validity records a row per scenario it was asked to check, including
+    # ones where generation never produced a file ("No recognizable IaC files
+    # found"). Those rows carry zero findings from every scanner -- so a scenario
+    # that was never generated is indistinguishable from one generated with no
+    # vulnerabilities, and the model gets CREDIT for security it never earned.
+    #
+    # This is not hypothetical: 11 complex extended-thinking generations were
+    # refused at collection time for being truncated (stop_reason=max_tokens),
+    # and all 11 reappeared here as clean zero-vulnerability rows -- biasing the
+    # precise arm whose vulnerability density the paper is testing. A missing
+    # generation is missing data, not a secure result.
+    n_before = len(base_df)
+    def _has_file(row) -> bool:
+        d = PATHS.generated / str(row['complexity']) / str(row['model']) / str(row['scenario_id'])
+        return d.is_dir() and any(d.glob('main.*'))
+    base_df = base_df[base_df.apply(_has_file, axis=1)]
+    dropped = n_before - len(base_df)
+    if dropped:
+        logging.warning(
+            "Dropped %d row(s) with no generated file on disk (ungenerated scenarios "
+            "must not be scored as zero-vulnerability).", dropped)
     
     # Clean complexity
     base_df['complexity'] = base_df['complexity'].replace({'simple': 'simple', 'complex': 'complex'})
@@ -52,16 +76,39 @@ def main():
     # IaC format
     base_df['iac_format'] = base_df['scenario_id'].apply(get_iac_format)
 
-    # Resource counts
-    rc = resource_counts[['scenario_id', 'model', 'resource_count']].drop_duplicates()
-    base_df = base_df.merge(rc, on=['scenario_id', 'model'], how='left')
-    
-    # If resource count is missing in resource_counts but exists in structural_metrics
+    # Resource counts -- structural_metrics.csv is AUTHORITATIVE.
+    #
+    # Two sources report resource_count and they disagree badly:
+    #   structural_metrics.csv  Phase 4, parses the IaC with hcl2/yaml and counts
+    #                           declared resources. Authoritative.
+    #   resource_counts.csv     Phase 3, derived from scanner output. Silently
+    #                           degrades to 1 when the scanner cannot parse a file.
+    #
+    # The original merge took resource_counts FIRST and only backfilled from
+    # structural, so the degraded value won wherever both existed. Measured
+    # complex-stratum means: claude-opus-4-6-thinking 1.00 (std 0.00!) from
+    # resource_counts vs 24.76 from the AST parse; claude-sonnet-4-6 1.00 vs 34.41.
+    #
+    # resource_count is the DENOMINATOR of vulns_per_resource, the paper's primary
+    # metric and the GLMM exposure offset. A denominator pinned at 1 turns a
+    # density into a raw count: it inflated the extended-thinking arm's apparent
+    # density to 104.6 vulns/resource and produced a spurious "+2528% vs standard"
+    # -- an artifact of the divisor, not a property of the model.
+    #
+    # Prefer the AST count; fall back to the scanner count only where the AST
+    # parse produced nothing.
     struct_rc = structural[['scenario_id', 'model', 'resource_count']].drop_duplicates()
-    base_df = base_df.merge(struct_rc, on=['scenario_id', 'model'], how='left', suffixes=('', '_struct'))
-    base_df['resource_count'] = base_df['resource_count'].fillna(base_df['resource_count_struct'])
-    base_df = base_df.drop(columns=['resource_count_struct'])
-    base_df['resource_count'] = base_df['resource_count'].fillna(1.0) # avoid div by zero, fallback to 1
+    base_df = base_df.merge(struct_rc, on=['scenario_id', 'model'], how='left')
+
+    rc = resource_counts[['scenario_id', 'model', 'resource_count']].drop_duplicates()
+    base_df = base_df.merge(rc, on=['scenario_id', 'model'], how='left', suffixes=('', '_scanner'))
+    base_df['resource_count'] = base_df['resource_count'].fillna(base_df['resource_count_scanner'])
+    base_df = base_df.drop(columns=['resource_count_scanner'])
+
+    # Genuinely-zero resource counts are left as 0, NOT coerced to 1. A file that
+    # declares no resources has no exposure; the rate model excludes it explicitly
+    # (see nb_glmm.py) rather than silently inventing a denominator.
+    base_df['resource_count'] = base_df['resource_count'].fillna(0.0)
 
     # Findings aggregation
     # Filter to FAILED status

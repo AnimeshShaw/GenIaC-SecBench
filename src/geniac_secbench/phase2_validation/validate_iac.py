@@ -194,7 +194,56 @@ def main():
                 out_file.flush()
                 
     out_file.close()
+    _dedupe_and_prune(Path(args.output_csv))
     logging.info("Validation complete.")
+
+
+def _dedupe_and_prune(csv_path: Path) -> None:
+    """Collapse the append-only log into one row per (dataset, model, scenario).
+
+    This file is opened in 'a' mode so results stream to disk as each scenario is
+    validated (a crash mid-run keeps what was already checked). The cost is that
+    a SECOND run appends a second full copy instead of replacing the first. That
+    happened during the Aug 2026 remediation: schema_validity.csv reached 2,115
+    rows for 1,132 generated files -- 937 duplicates -- and build_master_table
+    then joined against it, inflating master_results.csv to 2,115 rows with every
+    model's counts roughly doubled. Nothing errored; the numbers were simply wrong.
+
+    It also strips rows whose model directory no longer exists, so a renamed arm
+    (e.g. claude-3-5-sonnet -> claude-sonnet-4-6) doesn't linger as a phantom
+    model in every downstream table.
+
+    Keeps the LAST row for each key -- the most recent validation wins.
+    """
+    if not csv_path.exists():
+        return
+    try:
+        import pandas as pd
+        df = pd.read_csv(csv_path)
+    except Exception as e:  # noqa: BLE001
+        logging.warning("Could not post-process %s: %s", csv_path, e)
+        return
+
+    before = len(df)
+    key = ["dataset", "model", "scenario_id"]
+    if not all(k in df.columns for k in key):
+        return
+    df = df.drop_duplicates(subset=key, keep="last")
+    deduped = before - len(df)
+
+    live = {p.name for ds in ("simple", "complex")
+            for p in (PATHS.generated / ds).iterdir()
+            if (PATHS.generated / ds).exists() and p.is_dir()}
+    if live:
+        stale = df[~df["model"].isin(live)]
+        if len(stale):
+            logging.warning("Dropping %d rows for models no longer on disk: %s",
+                            len(stale), sorted(stale["model"].unique()))
+            df = df[df["model"].isin(live)]
+
+    df.to_csv(csv_path, index=False)
+    logging.info("schema_validity: %d -> %d rows (%d duplicates removed)",
+                 before, len(df), deduped)
 
 if __name__ == "__main__":
     main()
