@@ -59,3 +59,12 @@ data/_archive_v1/
 
 # Legacy scratch scripts retained for reference; not part of the pipeline
 archive/legacy_scratch/*.b64
+
+# LaTeX build artifacts (main.pdf IS tracked -- it is the deliverable)
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.blg
+paper/*.bbl
+paper/*.toc
+paper/*.synctex.gz
