@@ -20,7 +20,7 @@
 LLM-Generated Infrastructure-as-Code}
 
 \author{\IEEEauthorblockN{Animesh Shaw}
-\IEEEauthorblockA{animesh15b@iimk.edi.in}
+\IEEEauthorblockA{animesh15b@iimk.edu.in}
 }
 
 \maketitle
@@ -616,13 +616,13 @@ inherit that engine's rule coverage as if it were ground truth. We note that our
 own earlier, partially-covered corpus would have supported different conclusions
 about inter-engine agreement, which is why we report coverage explicitly.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\columnwidth]{cis_category_heatmap.png}
+\includegraphics[width=0.86\textwidth]{cis_category_heatmap.png}
 \caption{Findings by CIS category and configuration. ``Other'' reflects rules
 without a clean CIS mapping and should not be read as a vulnerability class.}
 \label{fig:cis}
-\end{figure}
+\end{figure*}
 
 \begin{figure}[t]
 \centering
@@ -841,6 +841,122 @@ the least distinguishable from the field ($D=0.134$, $p=0.068$)---unsurprising,
 since they share a base model---while \texttt{phi3} is essentially disjoint
 ($D=0.901$).
 
+\subsection{Summary of statistical procedures}
+\label{sec:testsummary}
+Table~\ref{tab:alltests} consolidates every inferential procedure reported in
+this paper: what each measures, why that test was chosen over alternatives, and
+what it returned. We include the tests that produced null and negative results,
+and the one test that could not be computed at all, since selectively reporting
+only significant procedures is itself a source of bias.
+
+\begin{table*}[!tp]
+\caption{All statistical procedures performed, what each measures, and its
+outcome. ``$\rightarrow$'' gives the interpretation. Tests are grouped by the
+question they answer; null and negative results are included.}
+\label{tab:alltests}
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{@{}p{2.7cm}p{3.5cm}p{4.0cm}p{6.4cm}@{}}
+\toprule
+\textbf{Test} & \textbf{What it measures} & \textbf{Why this test} & \textbf{Result and outcome} \\
+\midrule
+\multicolumn{4}{@{}l}{\textbf{\emph{Q1. Are LLMs less secure than human engineers?}}} \\
+\addlinespace[2pt]
+Spearman rank correlation
+& Association between vulnerability density and artifact size
+& Non-parametric; densities are skewed and the relationship need not be linear
+& $\rho=-0.546$, $p=1.7\times10^{-78}$ $\rightarrow$ density falls sharply with size, so \emph{unmatched} comparisons measure artifact size, not security. Motivates all matching below. \\
+Mann--Whitney $U$ (per size stratum)
+& LLM vs.\ human density within matched resource-count bins
+& Two independent samples, non-normal; matching removes the size confound
+& Significant in 5 of 6 bins ($p<0.05$); ratio $4.9\times$ (1 resource) $\rightarrow$ $1.4\times$ (20+, n.s.) $\rightarrow$ \textbf{gap is real and largest on the simplest artifacts}. \\
+Aggregate matched ratio
+& Per-configuration density relative to human, weighted across bins
+& Summarizes the stratified comparison in one figure per configuration
+& All 12 configurations in $3.21\times$--$3.87\times$ $\rightarrow$ \textbf{consistent across vendors, weights, and reasoning modes}. \\
+\addlinespace[3pt]
+\multicolumn{4}{@{}l}{\textbf{\emph{Q2. Do the configurations differ from each other?}}} \\
+\addlinespace[2pt]
+Skillings--Mack
+& Omnibus equality of configurations across scenarios (blocked design)
+& Generalizes Friedman to \emph{incomplete} blocks; required here because no scenario has all 12 configurations present
+& Simple: $\chi^2=69.3$, $df=10$, $p=6.0\times10^{-11}$ (60 blocks). Complex: $\chi^2=81.2$, $df=11$, $p=8.7\times10^{-13}$ (40 blocks) $\rightarrow$ \textbf{configurations differ}. \\
+Friedman (complete-case)
+& Same hypothesis, listwise deletion
+& Classical alternative; reported to justify its replacement
+& \textbf{Uncomputable}: 0 usable blocks in both strata $\rightarrow$ negative methodological result (Section~\ref{sec:negative}). \\
+Wilcoxon signed-rank + Holm
+& Pairwise configuration differences after a significant omnibus
+& Paired (same scenarios); Holm controls family-wise error over 66 pairs
+& 10/66 significant (simple), 9/66 (complex) $\rightarrow$ cross-vendor gaps dominate; \textbf{no same-model reasoning-arm pair survives correction}. \\
+\addlinespace[3pt]
+\multicolumn{4}{@{}l}{\textbf{\emph{Q3. Does reasoning improve security?}}} \\
+\addlinespace[2pt]
+Wilcoxon signed-rank (paired contrasts)
+& Within-model effect of each reasoning mode on density
+& Same model, same scenarios, one variable toggled; non-normal paired data
+& Extended thinking $-13.2\%$ ($p=0.012$); CoT$\rightarrow$thinking $-12.0\%$ ($p=0.0013$); prompted CoT alone $-1.3\%$ (n.s.) $\rightarrow$ \textbf{vendor reasoning helps modestly; prompted CoT does not}. \\
+Reasoning-token share
+& Fraction of output budget spent on reasoning
+& Direct instrumentation rather than inference
+& ${<}1\%$ of output tokens $\rightarrow$ explains why the effect is bounded. \\
+\addlinespace[3pt]
+\multicolumn{4}{@{}l}{\textbf{\emph{Q4. What drives the rate, controlling for exposure?}}} \\
+\addlinespace[2pt]
+Negative binomial GEE ($\log$ exposure offset)
+& Per-resource finding rate by configuration and complexity
+& Counts are overdispersed; offset makes coefficients \emph{rates} not volumes; GEE handles repeated scenarios
+& Converged with exchangeable correlation $\rightarrow$ IRRs interpretable per resource. \\
+Overdispersion check
+& Variance-to-mean ratio of the count outcome
+& Determines whether Poisson is admissible
+& $\approx\!130\times$ $\rightarrow$ Poisson rejected; NB2 required (Section~\ref{sec:threats}). \\
+Configuration $\times$ complexity interaction
+& Whether a configuration's rate shifts disproportionately between strata
+& Tests differential degradation directly
+& 5 of 11 significant, all IRR${<}1$ $\rightarrow$ lower simple-stratum rates once exposure is controlled; the previously reported ``complexity relaxation'' effect does \textbf{not} survive ($p=0.275$). \\
+\addlinespace[3pt]
+\multicolumn{4}{@{}l}{\textbf{\emph{Q5. Is generated IaC structurally like human IaC?}}} \\
+\addlinespace[2pt]
+Two-sample Kolmogorov--Smirnov (vs.\ human)
+& Distributional equality on AST depth, resource count, diversity
+& Distribution-free; compares whole distributions, not just means
+& 36/36 tests reject ($p<0.05$) $\rightarrow$ \textbf{all configurations structurally diverge}; \texttt{gpt-4o} closest ($D=0.160$), \texttt{phi3} most divergent ($D=0.990$). \\
+KS (configuration vs.\ field)
+& Whether each configuration occupies a distinct structural niche
+& Same rationale, applied pairwise against the pooled remainder
+& 30/48 significant $\rightarrow$ configurations are structurally distinguishable. \\
+KS (simple vs.\ complex)
+& Whether the complexity strata actually differ in the artifacts
+& Validates the stratification rather than assuming it
+& Rejects equality $\rightarrow$ \textbf{stratification is real}, not just prompt wording. \\
+\addlinespace[3pt]
+\multicolumn{4}{@{}l}{\textbf{\emph{Q6. Is the evaluation itself trustworthy?}}} \\
+\addlinespace[2pt]
+Fleiss' $\kappa$
+& Agreement among three human raters per criterion
+& Chance-corrected agreement for ${>}2$ raters
+& Plausibility $0.391$; hallucination $0.266$; coherence $0.210$; \textbf{security relevance $0.059$ (near chance)} $\rightarrow$ some criteria are not reliably measurable by humans. \\
+Cohen's $\kappa$ (binary)
+& Human consensus vs.\ LLM judge on the hallucination flag
+& Chance-corrected agreement for a binary label
+& $\kappa=0.640$, 94.4\% exact $\rightarrow$ \textbf{judge is substantially reliable for factual verification}. \\
+Quadratic-weighted $\kappa$ (ordinal)
+& Human consensus vs.\ LLM judge on the 1--5 criteria
+& Penalizes large ordinal disagreements more than adjacent ones
+& Plausibility $0.795$; relevance $0.489$; \textbf{coherence $0.177$} $\rightarrow$ judge is unreliable for architectural judgment. \\
+\addlinespace[3pt]
+\multicolumn{4}{@{}l}{\textbf{\emph{Q7. Negative result: the validity--security paradox}}} \\
+\addlinespace[2pt]
+Pearson correlation
+& Schema-validity pass rate vs.\ vulnerability density across configurations
+& Tests the prior hypothesis that more deployable models are more vulnerable
+& $r=0.158$, $p=0.625$ $\rightarrow$ \textbf{hypothesis unsupported}; reported as a negative result. \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
 \section{Discussion}
 \label{sec:discussion}
 
@@ -981,10 +1097,39 @@ triage to connect policy findings to realizable attack paths; deployment-time
 validation beyond static analysis; and improved rubric anchoring, given that
 expert agreement on security-test relevance was near chance.
 
+\section*{Acknowledgements}
+We thank the three practicing cloud and security engineers who independently
+reviewed the stratified scenario sample that underpins
+Section~\ref{sec:human-eval}. They scored every sampled scenario without seeing
+one another's ratings, and their disagreement---not merely their
+agreement---shaped the reliability analysis and the limits we place on the LLM
+judge. All three consented to be named:
+
+\begin{itemize}\raggedright
+  \item \textbf{Abhishek Pandey} ---
+    \href{mailto:Abhishekp15b@iimk.edu.in}{Abhishekp15b@iimk.edu.in} ---
+    \href{https://www.linkedin.com/in/abhishek-pandey-52926419/}{linkedin.com/in/abhishek-pandey-52926419}
+  \item \textbf{Manickam Venkatachalam} ---
+    \href{mailto:dev.venkey2000@gmail.com}{dev.venkey2000@gmail.com} ---
+    \href{https://www.linkedin.com/in/manickam-venkatachalam/}{linkedin.com/in/manickam-venkatachalam}
+  \item \textbf{Prajjuwal Varshney} ---
+    \href{mailto:prajjuwalvarshney@gmail.com}{prajjuwalvarshney@gmail.com} ---
+    \href{https://in.linkedin.com/in/prajjuwal-varshney-42861a107}{linkedin.com/in/prajjuwal-varshney-42861a107}
+\end{itemize}
+
+\noindent Their raw scores are released in anonymized form (\texttt{R1}--\texttt{R3});
+the mapping between identifiers and identities is retained only by the author and
+is not distributed.
+
 \section*{Data Availability}
 The pipeline, statistical analysis code, figure generation, coverage manifests,
 and threats-to-validity documentation are released. Every figure and table is
-regenerated from the released data by a single command.
+regenerated from the released data by a single command. The generated corpus,
+raw scanner output, human reference corpus, and all derived result tables are
+archived at
+\href{https://huggingface.co/datasets/AnimeshShaw/GenIaC-SecBench}{huggingface.co/datasets/AnimeshShaw/GenIaC-SecBench};
+the code is at
+\href{https://github.com/AnimeshShaw/GenIaC-SecBench}{github.com/AnimeshShaw/GenIaC-SecBench}.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
