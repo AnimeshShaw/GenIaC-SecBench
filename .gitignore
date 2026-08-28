@@ -1,27 +1,70 @@
-﻿# Environments
+# Environments
 .env
 venv/
 env/
+.venv/
+.venv_checkov/
 __pycache__/
 *.pyc
-*.ps1
+*.egg-info/
+src/*.egg-info/
 
-# The entire data directory is hosted on Hugging Face!
-# We ignore the contents but keep the folder structure.
+# Terraform's shared provider plugin cache (see validate_iac.py) -- keeps
+# `terraform init` from re-downloading providers into every scenario dir.
+.terraform_plugin_cache/
+
+# The full dataset (generated IaC, raw scan JSON, human reference corpus) is
+# hosted on Hugging Face -- see REPRODUCIBILITY.md. We ignore data/ contents
+# but keep the folder structure, and explicitly track the small
+# human-authored / hand-curated files that ARE the source of truth for the
+# benchmark (scenario prompts, reviewer CSVs) rather than derived output.
 data/*
 !data/.keep
+!data/prompts/
+!data/prompts/**
+# Git prunes traversal into an ignored directory, so unignoring a single
+# file inside data/human_reviews/ requires unignoring the directory ENTRY
+# first (so git looks inside it at all), then re-ignoring its contents by
+# default, then carving out just the rater CSVs. Do NOT collapse this to
+# `!data/human_reviews/human_review_R*.csv` alone -- without the directory
+# unignore first, git never evaluates that pattern and the whole dir stays
+# ignored; and do NOT add a bare `!data/human_reviews/**` -- that would also
+# un-ignore REVIEWER_KEY_local_only.csv, which must never be committed (it's
+# the only place the real reviewer identities live).
+!data/human_reviews/
+data/human_reviews/*
+!data/human_reviews/human_review_R*.csv
 
-# Security Scanners Binaries / Executables
-tools/kics/
-tools/trivy/
-tools/*.exe
-tools/*.tar.gz
-tools/*.zip
+# Local per-scenario Terraform caches (created transiently by `terraform
+# init` during Phase 2 validation; cleaned up automatically, but ignore
+# defensively in case a run is interrupted mid-scenario).
+data/generated/**/.terraform/
+data/generated/**/.terraform.lock.hcl
+
+# Third-party scanner/validator binaries and cloned tool repos -- large,
+# platform-specific, and independently re-fetchable via third_party/install.*
+third_party/kics/
+third_party/arm-ttk/
+third_party/*.exe
+third_party/*.tar.gz
+third_party/*.zip
 
 # IDEs
 .vscode/
 .idea/
 
-# Checkpoint / Scratch
-scratch/
-*.b64
+# Pre-remediation snapshot / historical result archive (kept locally for
+# provenance, not versioned -- see data/_archive_v1/PROVENANCE.md)
+data/_archive_v1/
+
+# Legacy scratch scripts retained for reference; not part of the pipeline
+archive/legacy_scratch/*.b64
+
+# LaTeX build artifacts (main.pdf IS tracked -- it is the deliverable)
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.blg
+paper/*.bbl
+paper/*.toc
+paper/*.synctex.gz

@@ -1,9 +1,39 @@
-﻿pandas==2.2.0
-litellm==1.44.0
-scikit-learn==1.4.0
-statsmodels==0.14.1
-scipy==1.12.0
-python-hcl2==4.3.0
-PyYAML==6.0.1
-tqdm==4.66.1
-python-dotenv==1.0.1
+# GenIaC-SecBench -- pipeline & analysis dependencies.
+#
+# NOTE on python-hcl2: this MUST stay the vanilla `python-hcl2` package
+# (not `bc-python-hcl2`). Checkov depends on bc-python-hcl2, which claims
+# the same `hcl2` import name and installing both in one environment causes
+# whichever installs last to silently shadow the other. Checkov is
+# deliberately installed into an isolated environment instead
+# (scripts/setup_checkov_env.py locally, /opt/venv_checkov in Docker) so
+# this package can stay the modern parser the structural-metrics scripts
+# need. See docs/THREATS_TO_VALIDITY.md for the full story.
+#
+# Versions below are floors, not exact pins -- they're what this pipeline
+# was last verified against (Aug 2026 remediation), not a hard requirement.
+# Exact-pinning here previously drifted out of sync with what was actually
+# installed (e.g. pandas 2.2.0 pinned vs 3.0.5 in active use) without
+# anyone noticing, which is worse for reproducibility than a floor.
+
+pandas>=2.2.0
+litellm>=1.44.0
+scikit-learn>=1.4.0
+statsmodels>=0.14.1
+scipy>=1.12.0
+python-hcl2>=8.1.2
+PyYAML>=6.0.1
+tqdm>=4.66.1
+python-dotenv>=1.0.1
+
+# Visualization (Phase 8 reporting)
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Statistics (Phase 6 -- post-hoc pairwise comparisons)
+scikit-posthocs>=0.9.0
+
+# Dataset distribution (Phase 0 setup / REPRODUCIBILITY.md)
+huggingface_hub>=0.24.0
+
+# Phase 5 LLM judge (Grok)
+xai-sdk>=1.19.0

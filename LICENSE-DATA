@@ -1,0 +1,28 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+This license covers the DATASET produced by this project -- the generated
+Infrastructure-as-Code corpus, raw and parsed security scanner output,
+structural metrics, LLM-judge scores, and (anonymized) human review data
+distributed via Hugging Face (see REPRODUCIBILITY.md).
+
+Full license text: https://creativecommons.org/licenses/by/4.0/legalcode
+
+You are free to:
+  - Share -- copy and redistribute the material in any medium or format
+  - Adapt -- remix, transform, and build upon the material for any purpose,
+    even commercially
+
+Under the following terms:
+  - Attribution -- you must give appropriate credit, provide a link to the
+    license, and indicate if changes were made. See CITATION.cff for the
+    preferred citation.
+
+This license does NOT apply to this repository's source code, which is MIT
+licensed -- see LICENSE.
+
+Note on the human-authored reference corpus (data/human_reference_dataset/):
+those files are extracted from third-party public repositories under their
+own original licenses (see docs/methodology/human_baseline_methodology.md
+for provenance). CC-BY-4.0 above applies only to data this project produced
+itself -- the generated IaC, scan results, metrics, and review data -- not
+to the upstream reference corpus.
