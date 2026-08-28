@@ -68,3 +68,8 @@ paper/*.blg
 paper/*.bbl
 paper/*.toc
 paper/*.synctex.gz
+
+# arXiv submission package (source is generated; tarball is the deliverable)
+paper/arxiv/*.aux
+paper/arxiv/*.log
+paper/arxiv/*.out
