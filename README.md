@@ -1,6 +1,6 @@
 # GenIaC-SecBench
 
-**Paper:** *Valid but Vulnerable: The Security-by-Default Paradox in LLM-Generated Infrastructure*
+**Paper:** *Compared to What? A Human-Anchored Security Benchmark for LLM-Generated Infrastructure-as-Code*
 
 This repository contains the evaluation pipeline, statistical analysis code, and LLM-as-a-Judge infrastructure for the GenIaC-SecBench research project.
 

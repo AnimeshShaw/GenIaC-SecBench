@@ -1,7 +1,6 @@
 # GenIaC-SecBench — Comprehensive Findings
 
-**Paper:** *Three Times Less Secure: A Human-Anchored Benchmark of LLM-Generated
-Infrastructure-as-Code*
+**Paper:** *Compared to What? A Human-Anchored Security Benchmark for LLM-Generated Infrastructure-as-Code*
 
 > Interpretive companion to `RESULTS.md`, which is generated directly from
 > `data/summary_reports/` and is the authoritative source for every number.

@@ -1,18 +1,38 @@
 cff-version: 1.2.0
-message: "If you use GenIaC-SecBench in your research, please cite it as below."
-title: "GenIaC-SecBench: A Security Evaluation Benchmark for LLM-Generated Infrastructure-as-Code"
+message: "If you use GenIaC-SecBench in your research, please cite the paper below."
+title: "GenIaC-SecBench: A Human-Anchored Security Benchmark for LLM-Generated Infrastructure-as-Code"
+abstract: >-
+  GenIaC-SecBench evaluates the security posture of LLM-generated
+  Infrastructure-as-Code against a size-matched human baseline. It comprises 100
+  deployment scenarios stratified by architectural complexity, 1,196 generated
+  artifacts across 12 model configurations from four vendors, complete scan
+  coverage by three independent policy engines (Checkov, Trivy, KICS), and 634
+  human-authored IaC templates scanned with the identical toolchain to provide
+  the reference point that model-only benchmarks lack.
 authors:
   - family-names: Shaw
     given-names: Animesh
+    email: animesh15b@iimk.edu.in
 type: dataset
-date-released: 2026-08-25
+version: "1.0.0"
+date-released: 2026-08-26
 url: "https://github.com/AnimeshShaw/GenIaC-SecBench"
+repository-code: "https://github.com/AnimeshShaw/GenIaC-SecBench"
+repository-artifact: "https://huggingface.co/datasets/AnimeshShaw/GenIaC-SecBench"
 license: MIT
-license-data: CC-BY-4.0
+keywords:
+  - infrastructure as code
+  - large language models
+  - software security
+  - static analysis
+  - cloud security
+  - empirical software engineering
+  - benchmark
 preferred-citation:
   type: article
-  title: "Valid but Vulnerable: The Security-by-Default Paradox in LLM-Generated Infrastructure"
+  title: "Compared to What? A Human-Anchored Security Benchmark for LLM-Generated Infrastructure-as-Code"
   authors:
     - family-names: Shaw
       given-names: Animesh
+      email: animesh15b@iimk.edu.in
   year: 2026

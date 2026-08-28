@@ -48,6 +48,10 @@ PHASES = {
     ],
     "scan": [
         "phase3_scanning.run_scanners",
+        # The human reference corpus is scanned with the IDENTICAL toolchain.
+        # This is what makes the central comparison possible: without it every
+        # density figure is model-vs-model with no reference point.
+        "phase3_scanning.scan_human_baseline",
         "phase3_scanning.parse_results",
     ],
     "structural": [
@@ -64,15 +68,29 @@ PHASES = {
         "phase6_statistics.friedman_test",
         "phase6_statistics.nb_glmm",
     ],
+    # Inter-rater and human-vs-judge agreement. Uses agreement_metrics, which
+    # supersedes the earlier fleiss_kappa.py / human_vs_grok.py pair: those two
+    # printed to stdout and persisted nothing, so re-running Phase 7 could not
+    # refresh human_agreement_metrics.json and the paper's kappa figures aged
+    # out of sync with the data. They also took the lowest value on a 3-way
+    # rater tie instead of the median.
+    "human_review": [
+        "phase7_human_review.agreement_metrics",
+    ],
     "report": [
         "phase8_reporting.visualize_final",
+        "phase8_reporting.visualize_human_baseline",
+        # Regenerates docs/findings/RESULTS.md straight from the result files,
+        # so no published number is ever hand-transcribed.
+        "phase8_reporting.findings_report",
     ],
 }
 
 # `analyze` = everything that doesn't need API keys or scanner binaries --
 # safe to run against an already-downloaded dataset (matches the old
 # `--analyze-only` flag's intent).
-PHASES["analyze"] = PHASES["structural"] + PHASES["statistics"] + PHASES["report"]
+PHASES["analyze"] = (PHASES["structural"] + PHASES["statistics"]
+                     + PHASES["human_review"] + PHASES["report"])
 
 
 def main():
@@ -81,14 +99,15 @@ def main():
         "--phase",
         choices=["all", *PHASES.keys()],
         default="analyze",
-        help="Which phase to run. 'all' runs generate -> validate -> scan -> structural -> judge -> statistics -> report.",
+        help="Which phase to run. 'all' runs generate -> validate -> scan -> structural -> judge -> statistics -> human_review -> report.",
     )
     parser.add_argument("--model", type=str, default=None, help="Restrict to a single model where the phase supports it.")
     parser.add_argument("--dry-run", action="store_true", help="Preview without calling LLM APIs (generation phase only).")
     args = parser.parse_args()
 
     if args.phase == "all":
-        order = ["generate", "validate", "scan", "structural", "judge", "statistics", "report"]
+        order = ["generate", "validate", "scan", "structural", "judge",
+                 "statistics", "human_review", "report"]
     else:
         order = [args.phase]
 
