@@ -45,7 +45,17 @@ pip install huggingface_hub  # included in requirements.txt already
 python scripts/download_dataset.py --repo-id AnimeshShaw/GenIaC-SecBench
 ```
 
-Once complete, `data/generated/`, `data/scan_results/`, and `data/summary_reports/` will be populated locally. (`data/prompts/` and `data/human_reviews/` are small enough to ship directly in this git repository and don't need downloading.)
+Once complete, the entire `data/` tree is populated locally — `generated/`,
+`scan_results/`, `summary_reports/`, `human_reference_dataset/`,
+`scan_results_human/`, `figures/`, and also `prompts/` (the 100 scenario
+definitions) and `human_reviews/` (the anonymized rater scores).
+
+Every one of those comes from Hugging Face; none is tracked in this git
+repository. Earlier revisions shipped the prompts and reviewer CSVs in git
+because they are small, but that let a clone drift out of step with the published
+dataset — a repo checkout and a dataset download could disagree about what the
+100 scenarios actually were, with nothing to flag it. One source of truth is
+worth more than the convenience.
 
 ---
 
