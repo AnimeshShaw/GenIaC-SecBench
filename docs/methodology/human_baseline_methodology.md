@@ -1,7 +1,7 @@
 ﻿# Human Baseline Methodology (Phase 4 Extension)
 
 ## Overview
-To provide a statistically sound anchor for our structural metrics (AST Depth, Resource Count, Resource Diversity), we processed three massive, human-authored infrastructure repositories. The goal was to establish a mathematical "Human Baseline" and compare it against the output of our 11 frontier LLMs using a Two-Sample Kolmogorov-Smirnov (KS-Test).
+To provide a statistically sound anchor for our structural metrics (AST Depth, Resource Count, Resource Diversity), we processed three massive, human-authored infrastructure repositories. The goal was to establish a mathematical "Human Baseline" and compare it against the output of our 12 model configurations using a Two-Sample Kolmogorov-Smirnov (KS-Test).
 
 ## Datasets Processed
 The human baseline consists of code drawn from three validated, publicly available GitHub repositories:
@@ -23,7 +23,7 @@ To solve this, our extraction script (src/geniac_secbench/phase4_structural/extr
 
 ## Execution and the KS-Test
 1. **Extraction:** The 634 templates were processed, and their metrics were logged into data/summary_reports/human_reference_metrics.csv.
-2. **Comparison:** We executed src/geniac_secbench/phase4_structural/ks_test_human.py, which ran a Two-Sample KS-Test comparing the distributions of the human dataset against each of the 11 LLM outputs found in structural_metrics.csv.
+2. **Comparison:** We executed src/geniac_secbench/phase4_structural/ks_test_human.py, which ran a Two-Sample KS-Test comparing the distributions of the human dataset against each of the 12 model configurations found in structural_metrics.csv.
 3. **Results:** The resulting p-values and KS statistics were saved to data/summary_reports/ks_test_human_baseline.csv and .json.
 
 ## Output Files
@@ -31,3 +31,49 @@ To solve this, our extraction script (src/geniac_secbench/phase4_structural/extr
 - data/summary_reports/ks_test_human_baseline.csv: The statistical KS-Test results comparing each model's output to the human baseline.
 - src/geniac_secbench/phase4_structural/extract_human_metrics.py: The data sanitization and AST extraction script.
 - src/geniac_secbench/phase4_structural/ks_test_human.py: The mathematical comparison script.
+
+---
+
+## Security scanning of the human corpus
+
+The structural comparison above was the original purpose of this corpus. It was
+later extended to the study's central contribution: the same 634 templates are
+**security scanned with the identical toolchain** used on model output —
+Checkov, Trivy, and KICS — by
+`geniac_secbench.phase3_scanning.scan_human_baseline`.
+
+This closes the gap that motivates the paper. Without it, every vulnerability
+density in the study is model-versus-model with no reference point, and the
+question a practitioner actually asks — *are these models worse than the
+engineers they assist?* — is unanswerable. With it, the comparison is direct.
+
+Outputs: `human_baseline_findings.csv` (one row per finding) and
+`human_baseline_density.csv` (per-file counts joined to the AST-derived resource
+counts from `human_reference_metrics.csv`, giving a density directly comparable
+to `master_results.csv`).
+
+### Size matching is mandatory
+
+Density is strongly inverse to artifact size (Spearman ρ = −0.546, p < 10⁻⁷⁷),
+and the human corpus averages 5.31 declared resources against roughly 3 for
+simple-stratum generations and ~50 for complex ones. Comparing raw group means
+across that range measures artifact size, not security.
+
+All published comparisons therefore bin by `resource_count` and compare within
+bins. The unmatched comparison and the matched one disagree, and only the matched
+one is reported: unmatched, models appear indistinguishable from humans on the
+complex stratum; matched, every configuration sits at 3.21×–3.87× the human rate.
+
+### What this baseline is not
+
+The corpus is **not a matched control**. These files were not written against the
+100 benchmark scenarios, and many are curated *examples* published for
+instructional purposes rather than production infrastructure. Example templates
+may be deliberately minimal, or unusually careful — the direction of any bias is
+unknown and is not claimed to favour either side. A properly matched control
+would require human engineers to implement the same 100 scenarios under the same
+constraints; that is identified as future work.
+
+Scanner rule coverage also varies by format, and the corpus format mix differs
+from the generated mix, so cross-format density values are not comparable. See
+`../THREATS_TO_VALIDITY.md`.
