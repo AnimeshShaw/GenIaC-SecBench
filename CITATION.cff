@@ -28,6 +28,10 @@ keywords:
   - cloud security
   - empirical software engineering
   - benchmark
+identifiers:
+  - type: other
+    value: "arXiv:2608.28021"
+    description: arXiv preprint
 preferred-citation:
   type: article
   title: "Compared to What? A Human-Anchored Security Benchmark for LLM-Generated Infrastructure-as-Code"
@@ -36,3 +40,8 @@ preferred-citation:
       given-names: Animesh
       email: animesh15b@iimk.edu.in
   year: 2026
+  url: "https://arxiv.org/abs/2608.28021"
+  identifiers:
+    - type: other
+      value: "arXiv:2608.28021"
+      description: arXiv preprint

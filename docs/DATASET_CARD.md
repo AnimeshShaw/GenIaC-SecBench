@@ -30,8 +30,8 @@ configs:
 A benchmark for evaluating the security of LLM-generated Infrastructure-as-Code
 (IaC) **against a size-matched human baseline**.
 
-Paper: *Compared to What? A Human-Anchored Security Benchmark for LLM-Generated
-Infrastructure-as-Code*
+Paper: [*Compared to What? A Human-Anchored Security Benchmark for LLM-Generated
+Infrastructure-as-Code*](https://arxiv.org/abs/2608.28021) (arXiv:2608.28021)
 Code: https://github.com/AnimeshShaw/GenIaC-SecBench
 
 ## Why this dataset exists
@@ -217,9 +217,13 @@ measurable by humans — not a defect to be adjudicated away.
 
 ```bibtex
 @article{shaw2026comparedtowhat,
-  title  = {Compared to What? A Human-Anchored Security Benchmark for
-            LLM-Generated Infrastructure-as-Code},
-  author = {Shaw, Animesh},
-  year   = {2026}
+  title         = {Compared to What? A Human-Anchored Security Benchmark for
+                   LLM-Generated Infrastructure-as-Code},
+  author        = {Shaw, Animesh},
+  year          = {2026},
+  eprint        = {2608.28021},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CR},
+  url           = {https://arxiv.org/abs/2608.28021}
 }
 ```

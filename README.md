@@ -1,5 +1,6 @@
 # GenIaC-SecBench
 
+[![arXiv](https://img.shields.io/badge/arXiv-2608.28021-b31b1b.svg)](https://arxiv.org/abs/2608.28021)
 [![Dataset on HF](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-GenIaC--SecBench-yellow)](https://huggingface.co/datasets/AnimeshShaw/GenIaC-SecBench)
 [![Code License: MIT](https://img.shields.io/badge/Code-MIT-blue.svg)](LICENSE)
 [![Data License: CC BY 4.0](https://img.shields.io/badge/Data-CC%20BY%204.0-lightgrey.svg)](LICENSE-DATA)
@@ -8,8 +9,8 @@
 
 **A human-anchored security benchmark for LLM-generated Infrastructure-as-Code.**
 
-> **Paper:** *Compared to What? A Human-Anchored Security Benchmark for
-> LLM-Generated Infrastructure-as-Code*
+> **Paper:** [*Compared to What? A Human-Anchored Security Benchmark for
+> LLM-Generated Infrastructure-as-Code*](https://arxiv.org/abs/2608.28021) — arXiv:2608.28021
 
 Prior evaluations of generated IaC report vulnerability counts **for models
 only**. Saying a model averages eight findings per resource invites one question —
@@ -165,10 +166,14 @@ identities is retained solely by the author and is not distributed.
 
 ```bibtex
 @article{shaw2026comparedtowhat,
-  title  = {Compared to What? A Human-Anchored Security Benchmark for
-            LLM-Generated Infrastructure-as-Code},
-  author = {Shaw, Animesh},
-  year   = {2026}
+  title         = {Compared to What? A Human-Anchored Security Benchmark for
+                   LLM-Generated Infrastructure-as-Code},
+  author        = {Shaw, Animesh},
+  year          = {2026},
+  eprint        = {2608.28021},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CR},
+  url           = {https://arxiv.org/abs/2608.28021}
 }
 ```
 
