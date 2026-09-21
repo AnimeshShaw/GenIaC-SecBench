@@ -77,19 +77,26 @@ PHASES = {
     "human_review": [
         "phase7_human_review.agreement_metrics",
     ],
+    # Prompt security-prescriptiveness. Runs first: every downstream
+    # interpretation depends on whether a prompt asked for the insecure state.
+    "prompts": [
+        "phase0_prompts.classify_prompts",
+    ],
     "report": [
         "phase8_reporting.visualize_final",
         "phase8_reporting.visualize_human_baseline",
         # Regenerates docs/findings/RESULTS.md straight from the result files,
         # so no published number is ever hand-transcribed.
         "phase8_reporting.findings_report",
+        # Fails the run if any paper claim disagrees with the artifacts.
+        "phase8_reporting.verify_claims",
     ],
 }
 
 # `analyze` = everything that doesn't need API keys or scanner binaries --
 # safe to run against an already-downloaded dataset (matches the old
 # `--analyze-only` flag's intent).
-PHASES["analyze"] = (PHASES["structural"] + PHASES["statistics"]
+PHASES["analyze"] = (PHASES["prompts"] + PHASES["structural"] + PHASES["statistics"]
                      + PHASES["human_review"] + PHASES["report"])
 
 
@@ -106,7 +113,7 @@ def main():
     args = parser.parse_args()
 
     if args.phase == "all":
-        order = ["generate", "validate", "scan", "structural", "judge",
+        order = ["prompts", "generate", "validate", "scan", "structural", "judge",
                  "statistics", "human_review", "report"]
     else:
         order = [args.phase]

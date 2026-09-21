@@ -25,7 +25,7 @@ scanning 634 human-authored templates with the identical toolchain.
 <tr><td width="55%">
 
 **Every model configuration produces 3.21×–3.87× the vulnerability density of
-human engineers**, matched on artifact size — across four vendors, open and
+human engineers**, matched on artifact size — across six vendors, open and
 closed weights, and three reasoning modes.
 
 The gap is **widest on the simplest tasks**: 4.9× at one declared resource,
@@ -110,6 +110,14 @@ comparison suggests LLMs are indistinguishable from humans on complex scenarios;
 the size-matched comparison shows every configuration at 3.2×–3.9×. The second is
 correct.
 
+**A majority of prompts prescribe a security state** (52 insecure, 33 secure,
+15 functional-only). A finding on a prompt that *asked for* the insecure state
+measures instruction-following, not an unprompted default. Results are reported
+stratified by prompt class — see `prompt_classification.csv` and
+[`docs/THREATS_TO_VALIDITY.md`](docs/THREATS_TO_VALIDITY.md) §1.6. This was
+identified by an independent audit and corrected; the first preprint described
+the prompts as functional-only, which they are not.
+
 Two further traps are documented in [`docs/THREATS_TO_VALIDITY.md`](docs/THREATS_TO_VALIDITY.md):
 Checkov emits no severity tiers without a paid subscription (so all 14,017 of its
 findings are `UNKNOWN`), and `resource_counts.csv` silently degrades to 1 on parse
@@ -161,6 +169,12 @@ Three practicing cloud and security engineers independently reviewed the
 stratified scenario sample: **Abhishek Pandey**, **Manickam Venkatachalam**, and
 **Prajjuwal Varshney**. Their scores ship anonymized as `R1`–`R3`; the mapping to
 identities is retained solely by the author and is not distributed.
+
+**Lokesh Chauhan** ([IaC-Guard-V](https://github.com/lokesh0186/iac-guard-v),
+QRS 2026) independently reproduced these artifacts and identified that a
+majority of prompts prescribe a security state, contrary to how the first
+preprint described them. The finding reproduced exactly and materially improved
+the work.
 
 ## Citation
 
