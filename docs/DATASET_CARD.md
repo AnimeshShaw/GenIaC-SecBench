@@ -115,6 +115,9 @@ batch_jobs.json             Message Batches submitted, for provenance
 | `ks_test_human_baseline.csv` | KS tests vs. the human corpus. |
 | `human_agreement_metrics.json` | Fleiss' κ, human-vs-judge agreement. |
 | `scan_coverage.csv` | Per-model-per-scanner coverage manifest. |
+| `prompt_classification.csv` | **Read before interpreting any density.** Each scenario labelled insecure-prescriptive / secure-prescriptive / functional-only. |
+| `prompt_classification_audit.csv` | Independent classification by an external auditor, under different rules. Agrees with ours on 75/100. |
+| `prompt_classification_summary.json` | Class counts and the share of findings attributable to each class. |
 
 Full column definitions: `docs/appendix/data_dictionary.md` in the code repo.
 
@@ -146,6 +149,29 @@ python -m geniac_secbench.cli --phase analyze
 
 No API keys or scanner binaries are needed for `--phase analyze`; it recomputes
 all statistics, figures, and `docs/findings/RESULTS.md` from the released data.
+
+## ⚠️ A majority of prompts prescribe a security state
+
+52 of 100 scenarios explicitly request an insecure configuration ("Create a
+**public** S3 bucket", "**open SSH port**", "**cluster-admin** to the default
+service account"); 33 request a protective one; 15 specify function only.
+
+**A finding on a prompt that asked for the insecure state measures
+instruction-following, not an unprompted model default.** The two are different
+quantities. Insecure-prescriptive prompts account for 73% of simple-stratum
+findings.
+
+The first preprint of the paper described these prompts as functional-only,
+which they are not. That was identified by an independent audit, reproduced
+exactly, and corrected in arXiv v2. Both classifications are released so you can
+check either — they agree on 75/100 scenarios, and disagree mainly on complex
+prompts that prescribe security in both directions.
+
+Pooled, the size-matched gap is 3.50x under both schemes, and excluding every
+insecure-prescriptive scenario still leaves all configurations above the human
+baseline (2.4x-4.2x). What the corpus **cannot** do is isolate unprompted
+default posture: the functional-only stratum is small (103-149 artifacts) and
+the two schemes place it at 4.01x and 2.50x respectively.
 
 ## ⚠️ Read before you compare densities
 
